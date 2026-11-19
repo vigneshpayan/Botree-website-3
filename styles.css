@@ -1015,12 +1015,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .fd-rule i { position: relative; width: 32px; height: 18px; border-radius: 999px; background: #FF6A2B; flex: none; }
 .fd-rule i b { position: absolute; right: 3px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: #fff; }
 
-/* Captions inside the canvas */
-.fd-cap { position: absolute; bottom: 26px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: rgba(18, 16, 22, .82); }
-.fd-cap-l { left: 4%; }
-.fd-cap-c { left: 38%; width: 24%; justify-content: center; }
-.fd-cap .ok { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; flex: none; }
-.fd-cap .scr { display: inline-flex; align-items: flex-end; gap: 4px; color: var(--text); }
 
 @media (prefers-reduced-motion: no-preference) {
   .fd-lines path { animation: fdFlow 1.6s linear infinite; }
@@ -1028,3 +1022,31 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 @keyframes fdFlow { to { stroke-dashoffset: -20; } }
 @keyframes fdStep { 0%, 100% { background: #FFF6F1; border-color: #FFE3D5; } 12%, 30% { background: #FFE7DA; border-color: #FF9A62; } }
+
+/* Intelligence highlight — rotating orange → purple → white ring */
+@property --core-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.fd-core { isolation: isolate; border-color: transparent; }
+.fd-core::before {
+  content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; padding: 2.5px; pointer-events: none;
+  background: conic-gradient(from var(--core-a), #FF7A3D, #FF4F7B, #D63BE0, #FF4F7B, #FF7A3D);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.fd-core-name { font: 500 11.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: rgba(18, 16, 22, .72); margin-bottom: 12px; }
+@media (prefers-reduced-motion: no-preference) {
+  .fd-core::before { animation: coreSpin 4s linear infinite; }
+}
+@keyframes coreSpin { to { --core-a: 360deg; } }
+
+/* Core: single rotating ring only; name sits beside the badge */
+.fd-core, .fd.focus .fd-core { box-shadow: 0 30px 60px -28px rgba(160, 50, 20, .45); }
+.fd-core-top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.fd-core-top .fd-badge { margin-bottom: 0; }
+.fd-core-top .fd-core-name { margin-bottom: 0; }
+
+/* Thicker ring + sparkle tile rotates with the ring (same 4s loop) */
+.fd-core::before { padding: 3.5px; inset: -2px; }
+.fd-core .fd-badge { background: conic-gradient(from var(--core-a), #FF7A3D, #FF4F7B, #D63BE0, #FF4F7B, #FF7A3D); }
+@media (prefers-reduced-motion: no-preference) {
+  .fd-core .fd-badge { animation: coreSpin 4s linear infinite; }
+}

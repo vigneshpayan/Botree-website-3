@@ -2755,3 +2755,240 @@ section[aria-labelledby="layer-title"] { padding-bottom: clamp(48px, 5vw, 64px);
 /* Prism tile: no white ring on the logo; lighter diagonal (135°) brand gradient */
 .jr-prism .fd-badge { box-shadow: none; }
 .jr-prism { background: linear-gradient(135deg, #FFD6C2 0%, #FFBCCB 50%, #EDB9F4 100%); }
+
+/* ==========================================================================
+   RESPONSIVE — tablet (≤1023px) and mobile (≤720px) for the redesigned sections
+   ========================================================================== */
+html, body { overflow-x: clip; }
+.f-body { padding-inline: var(--side); }
+
+@media (max-width: 1023px) {
+  /* Hero */
+  .hero.hero-light { min-height: 0; padding-bottom: 140px; }
+
+  /* Most AI starts — flow diagram becomes a vertical flow: Context → Prism → Outcome */
+  .fd { height: auto; display: flex; flex-direction: column; gap: 14px; padding: 24px 20px 28px; }
+  .fd-lines { display: none; }
+  .fd-head, .fd-head-l, .fd-head-c, .fd-head-r { position: static; width: auto; text-align: left; }
+  .fd-head-l { order: 1; } .fd-in { order: 2; } .fd-head-c { order: 3; } .fd-core { order: 4; } .fd-head-r { order: 5; } .fd-out { order: 6; }
+  .fd-head-c, .fd-head-r { margin-top: 10px; }
+  .fd-in, .fd-out { position: static; width: auto; inset: auto; }
+  .fd-in li, .fd-out li { position: static; transform: none; top: auto !important; }
+  .fd-in { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fd-in button { width: auto; }
+  .fd-out { display: grid; gap: 8px; }
+  .fd-core { position: relative; left: auto; top: auto; width: auto; transform: none; }
+
+  /* Three people */
+  .tw-grid { grid-template-columns: 1fr; }
+  .tw-list { grid-auto-flow: column; grid-auto-columns: minmax(240px, 1fr); overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+  .tw-list::-webkit-scrollbar { display: none; }
+
+  /* AI-native staircase → stacked levels */
+  .sx { margin-top: 32px; }
+  .sx-line, .sx-wall, .sx-rail { display: none; }
+  .sx-steps { height: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 14px; }
+  .sx-step { height: auto; }
+  .s1 .sx-card, .s2 .sx-card, .s3 .sx-card, .s4 .sx-card { height: auto; min-height: 220px; }
+  .sx-num { position: static; margin-bottom: 4px; box-shadow: none; }
+  .sx-stop { position: static; display: inline-flex; margin-bottom: 14px; }
+  .sx-stop::after { content: none; }
+
+  /* Prism modules: one card per row */
+  .pf.pf4 { grid-template-columns: 1fr; }
+
+  /* Agents: stack copy over the panel */
+  .agx-grid { grid-template-columns: 1fr; gap: 32px; }
+
+  /* Journey */
+  .jh-top { grid-template-columns: 1fr; gap: 20px; align-items: start; }
+  .jh-ctrl { justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .jr-detail { grid-template-columns: 1fr; gap: 24px; }
+  .jr .tl-btn .lbl { font-size: 12px; }
+
+  /* Integration orbit → glowing core + a grid of integration cards */
+  .ox-stage { width: auto; height: auto; margin-top: 24px; padding-top: 190px; }
+  .ox-orbits, .ox-svg { display: none; }
+  .ox-aura { left: 50%; top: 90px; width: 420px; height: 260px; }
+  .ox-core { left: 50%; top: 90px; }
+  .ox-nodes { position: relative; z-index: 3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .ox-node { position: static; transform: none !important; width: auto; border-radius: 18px; align-items: flex-start; padding: 14px; }
+  .ox-node small { max-width: none; max-height: none; opacity: 1; white-space: normal; margin-top: 4px; }
+  .ox-node strong { white-space: normal; }
+  .ox-stage[data-hot] .ox-node:not(:hover):not(:focus) { opacity: 1; }
+  .ox-badges { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); }
+  .ox-badges li { background: #fff; }
+  .ox-badges li + li { border-left: 0; }
+
+  /* Testimonials */
+  .t-slide { grid-template-columns: 1fr; gap: 28px; }
+  .t-photo { max-width: 420px; width: 100%; }
+}
+
+@media (max-width: 720px) {
+  .hero.hero-light { padding-bottom: 96px; }
+  .hero.hero-light .display { font-size: clamp(38px, 10.4vw, 52px); }
+
+  .sx-steps { grid-template-columns: 1fr; }
+  .s1 .sx-card, .s2 .sx-card, .s3 .sx-card, .s4 .sx-card { min-height: 0; }
+
+  .tw-table { grid-template-columns: 1fr; }
+  .tw-col { grid-template-rows: 40px; grid-auto-rows: auto; }
+  .tw-td { padding-block: 10px; line-height: 1.4; }
+  .tw-metrics { flex-wrap: wrap; gap: 20px; }
+  .tw-metric { border-right: 0; margin-right: 0; padding-right: 0; }
+
+  /* Prism module card: copy, then widget, then outcome */
+  .pf4 .pf-card { grid-template-columns: 1fr; grid-template-areas: "copy" "ui" "proof"; gap: 18px; padding: 22px; }
+  .pf4 .pf-ui { min-height: 220px; }
+  .pf4 .pf-proof { margin-top: 0; }
+  .pf4 .pf-copy h3 { margin-top: 12px; }
+
+  .agx-ctx { grid-template-columns: 1fr; }
+  .agx-wires { height: 36px; }
+  .agx-stage { padding: 20px; }
+
+  /* Journey: compact road — numbered tiles, the caption and details tell the story */
+  .jh-ctrl .illus { display: none; }
+  .jr-stage { height: 250px; border-radius: 22px; }
+  .jr #stops { top: 128px; bottom: 44px; padding: 0 2px; }
+  .jr .tl-btn { padding-bottom: 8px; gap: 4px; }
+  .jr-tile { width: 34px; height: 34px; border-radius: 11px; }
+  .jr .jr-scene { width: 18px; height: 18px; }
+  .jr .tl-btn .lbl { display: none; }
+  .jr .tl-stop.active .jr-tile { transform: translateY(-3px) scale(1.1); }
+  .jr-road { height: 44px; }
+  .jr .jr-vehicle { transform: translateX(-50%) scale(.75); transform-origin: bottom center; bottom: 4px; }
+  .jr-caption { top: 56px; max-width: 250px; font-size: 13px; padding: 10px 12px; }
+  .jr-sun { width: 26px; height: 26px; margin-left: -13px; }
+  .jr-with { padding: 18px; }
+
+  .ox-stage { padding-top: 170px; }
+  .ox-aura { width: 320px; height: 220px; top: 80px; }
+  .ox-core { top: 80px; width: 92px; height: 92px; border-radius: 28px; }
+  .ox-nodes { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ox-node { flex-direction: column; gap: 10px; }
+  .ox-badges { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Testimonials: stat, quote, person, link in one column */
+  #t-slides { padding: 22px; border-radius: 22px; }
+  .t-copy { grid-template-columns: 1fr; grid-template-areas: "tag" "quote" "who" "link"; gap: 18px; }
+  .t-copy blockquote { padding: 0; border-left: 0; font-size: 17px; }
+  .t-num { font-size: 64px; }
+  .t-copy .who { padding-bottom: 0; }
+  .t-copy .who strong { font-size: 21px; }
+  .t-nav { flex-wrap: wrap; gap: 14px; }
+  .t-nav > .t-arrow { order: 2; }
+  .t-logos { order: 1; }
+
+  .t-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+}
+@media (max-width: 720px) {
+  .t-logos { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+  .t-nav { justify-content: center; }
+  .f-certs { gap: 10px; flex-wrap: wrap; }
+  .f-certs span { height: 64px; }
+  .f-certs img { max-height: 46px; }
+}
+
+/* CTA buttons: Botree icon instead of an arrow */
+.btn .orb.orb-mark { background: #fff; box-shadow: inset 0 0 0 1px rgba(11, 7, 18, .06); }
+.orb-mark i { display: block; width: 17px; height: 19px; background: url("https://cms.botree.ai/wp-content/uploads/2025/06/botree_logo.svg") left center / auto 100% no-repeat; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
+.btn:hover .orb-mark i { transform: translateY(-2px) scale(1.08); }
+@media (prefers-reduced-motion: reduce) { .orb-mark i { transition: none; } }
+
+/* ==========================================================
+   CTA buttons — premium black pill + Botree-mark arrow (two chevrons, 45°)
+   ========================================================== */
+.btn-ink { background: var(--ink); color: #fff; padding-left: 22px; gap: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 10px 24px -14px rgba(11, 7, 18, .7);
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease), background-color .25s; }
+.btn-ink:hover { background: #1A1220; transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 16px 30px -14px rgba(214, 59, 120, .55); }
+.btn-ink:active { transform: translateY(0) scale(.98); }
+
+.btn .orb.orb-bt { position: relative; overflow: hidden; color: #fff; box-shadow: none;
+  background: linear-gradient(135deg, #FF7A3D 0%, #FF4F7B 55%, #D63BE0 100%); }
+.orb-bt i { position: absolute; inset: 0; display: grid; place-items: center; }
+.orb-bt svg { width: 17px; height: 17px; transform: rotate(45deg); }
+.orb-bt .a2 { transform: translate(-130%, 130%); }
+@media (prefers-reduced-motion: no-preference) {
+  .orb-bt i { transition: transform .45s cubic-bezier(.65, 0, .35, 1); }
+  .btn:hover .orb-bt .a1 { transform: translate(130%, -130%); }
+  .btn:hover .orb-bt .a2 { transform: translate(0, 0); transition-delay: .06s; }
+}
+.btn:hover .orb svg { transform: rotate(45deg); }
+.orb-bt svg { width: 19px; height: 19px; }
+
+/* CTA v3 — single → arrow, slide-through micro-interaction, 20px corners */
+.btn-ink, .btn-light { border-radius: 20px; }
+.btn .orb.orb-bt { border-radius: 13px; }
+.orb-bt svg, .btn:hover .orb svg { width: 18px; height: 18px; transform: none; }
+.orb-bt .a2 { transform: translateX(-140%); }
+@media (prefers-reduced-motion: no-preference) {
+  .orb-bt i { transition: transform .4s cubic-bezier(.65, 0, .35, 1); }
+  .btn:hover .orb-bt .a1 { transform: translateX(140%); }
+  .btn:hover .orb-bt .a2 { transform: translateX(0); transition-delay: .05s; }
+}
+
+/* CTA v4 — 15px corners; on hover the arrow box rotates and the arrow turns up (→ to ↗) */
+.btn-ink, .btn-light { border-radius: 15px; }
+.btn .orb.orb-bt { border-radius: 11px; overflow: visible; transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); }
+.orb-bt .a2 { display: none; }
+.orb-bt .a1, .btn:hover .orb-bt .a1 { transform: none; transition: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .btn:hover .orb.orb-bt { transform: rotate(-45deg); }
+  .btn:active .orb.orb-bt { transform: rotate(-45deg) scale(.92); }
+}
+
+/* CTA v5 — 10px corners, no motion; arrow only on Book a demo */
+.btn-ink, .btn-light { border-radius: 10px; transition: background-color .2s; }
+.btn-ink:hover, .btn-ink:active { transform: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 10px 24px -14px rgba(11, 7, 18, .7); }
+.btn .orb.orb-bt { border-radius: 7px; transition: none; }
+.btn:hover .orb.orb-bt, .btn:active .orb.orb-bt { transform: none; }
+.btn-ink:not(:has(.orb)) { padding-inline: 20px; }
+
+/* Book a demo — white button, dark text, black arrow tile */
+.btn.btn-demo { background: #fff; color: var(--ink); border: 1px solid rgba(11, 7, 18, .08); padding-left: 20px; gap: 14px;
+  box-shadow: 0 1px 2px rgba(11, 7, 18, .06), 0 12px 28px -16px rgba(11, 7, 18, .35); }
+.btn.btn-demo:hover, .btn.btn-demo:active { background: #fff; transform: none; box-shadow: 0 1px 2px rgba(11, 7, 18, .06), 0 12px 28px -16px rgba(11, 7, 18, .35); }
+.btn-demo .orb.orb-bt { background: var(--ink); color: #fff; }
+
+/* Book a demo — option 2: black fill + orange → purple gradient border, gradient arrow */
+.btn.btn-demo, .btn.btn-demo:hover, .btn.btn-demo:active {
+  color: #fff; border: 1.5px solid transparent;
+  background: linear-gradient(var(--ink), var(--ink)) padding-box, linear-gradient(135deg, #FF7A3D 0%, #FF4F7B 50%, #D63BE0 100%) border-box;
+  box-shadow: 0 12px 28px -16px rgba(214, 59, 120, .55);
+}
+.btn-demo .orb.orb-bt { background: none; width: 22px; height: 22px; }
+.btn-demo .orb-bt svg { width: 20px; height: 20px; stroke: url(#ctaGrad); }
+
+/* CTA v6 — 15px corners; Book a demo fills with the brand gradient on hover */
+.btn-ink, .btn-light, .btn.btn-demo { border-radius: 15px; }
+.btn.btn-demo { position: relative; overflow: hidden; isolation: isolate; }
+.btn.btn-demo::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+  background: linear-gradient(110deg, #FF7A3D 0%, #FF4F7B 50%, #D63BE0 100%);
+  transform: scaleX(0); transform-origin: left center; }
+.btn-demo .orb-bt svg { transition: transform .3s var(--ease); }
+.btn.btn-demo:hover { box-shadow: 0 16px 34px -14px rgba(224, 60, 120, .7); }
+.btn.btn-demo:hover .orb-bt svg { stroke: #fff; transform: translateX(4px); }
+.btn.btn-demo:focus-visible { outline: 2px solid #FF4F7B; outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .btn.btn-demo::before { transition: transform .45s cubic-bezier(.65, 0, .35, 1); }
+  .btn.btn-demo { transition: box-shadow .3s var(--ease); }
+}
+.btn.btn-demo:hover::before { transform: scaleX(1); }
+.btn.btn-demo::before { inset: -2px; }
+.btn.btn-demo:hover { background: linear-gradient(var(--ink), var(--ink)) padding-box, linear-gradient(110deg, #FF7A3D 0%, #FF4F7B 50%, #D63BE0 100%) border-box; }
+
+/* CTA v7 — no border; gradient painted on the button itself (no seams); same hover on Get started + Book a demo */
+.btn.btn-ink, .btn.btn-demo, .btn.btn-ink:hover, .btn.btn-demo:hover, .btn.btn-ink:active, .btn.btn-demo:active {
+  border: 0; color: #fff; border-radius: 15px; overflow: hidden;
+  background: linear-gradient(110deg, #FF7A3D 0%, #FF4F7B 50%, #D63BE0 100%) left center / 0% 100% no-repeat, var(--ink);
+  box-shadow: 0 10px 24px -14px rgba(11, 7, 18, .6);
+}
+.btn.btn-demo::before { content: none; }
+.btn.btn-ink:hover, .btn.btn-demo:hover { background-size: 100% 100%, auto; box-shadow: 0 16px 34px -14px rgba(224, 60, 120, .65); }
+@media (prefers-reduced-motion: no-preference) {
+  .btn.btn-ink, .btn.btn-demo { transition: background-size .45s cubic-bezier(.65, 0, .35, 1), box-shadow .3s var(--ease); }
+}
+.btn.btn-ink:focus-visible { outline: 2px solid #FF4F7B; outline-offset: 3px; }

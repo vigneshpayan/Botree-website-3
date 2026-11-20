@@ -1050,3 +1050,152 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 @media (prefers-reduced-motion: no-preference) {
   .fd-core .fd-badge { animation: coreSpin 4s linear infinite; }
 }
+
+/* ==========================================================
+   Three people — metric-led split (orange-led mesh panel)
+   ========================================================== */
+.pm { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
+
+/* People list */
+.pm-list { display: grid; gap: 10px; position: sticky; top: 110px; }
+.pm-person {
+  position: relative; isolation: isolate; display: flex; align-items: center; gap: 14px; text-align: left; cursor: pointer;
+  padding: 16px; border-radius: 16px; background: transparent; border: 1px solid var(--line); color: var(--text);
+  transition: background-color .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease);
+}
+.pm-person:hover { background: var(--canvas); }
+.pm-av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 500 13px var(--mono); background: var(--canvas); border: 1px solid var(--line); flex: none; transition: background .25s, color .25s, border-color .25s; }
+.pm-person strong { display: block; font-size: 16px; font-weight: 500; letter-spacing: -0.01em; }
+.pm-person small { display: block; font-size: 13.5px; color: var(--muted); }
+.pm-person[aria-selected="true"] { background: #fff; border-color: transparent; box-shadow: 0 16px 34px -22px rgba(160, 50, 20, .5); }
+.pm-person[aria-selected="true"] .pm-av { background: linear-gradient(135deg, #FF7A3D, #FF4F7B 70%, #D63BE0); color: #fff; border-color: transparent; }
+.pm-person[aria-selected="true"]::before {
+  content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; padding: 2.5px; pointer-events: none;
+  background: conic-gradient(from var(--core-a), #FF7A3D, #FF4F7B, #D63BE0, #FF4F7B, #FF7A3D);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pm-person[aria-selected="true"]::before { animation: coreSpin 4s linear infinite; }
+}
+
+/* Panel: one orange-led mesh */
+.pm-panel {
+  border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 24px; min-height: 520px;
+  background:
+    radial-gradient(55% 70% at 0% 100%, rgba(255, 122, 61, .38) 0%, rgba(255, 122, 61, 0) 70%),
+    radial-gradient(45% 60% at 100% 0%, rgba(255, 79, 123, .26) 0%, rgba(255, 79, 123, 0) 70%),
+    radial-gradient(35% 45% at 100% 100%, rgba(214, 59, 224, .14) 0%, rgba(214, 59, 224, 0) 70%),
+    linear-gradient(160deg, #FFF5EE 0%, #FFE9DD 100%);
+}
+.pm-panel[hidden] { display: none; }
+.pm-title { font-size: clamp(26px, 2.6vw, 34px); font-weight: 500; letter-spacing: -0.03em; }
+
+/* Metrics first, number joined to its label */
+.pm-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pm-metric { background: rgba(255, 255, 255, .82); border: 1px solid #fff; border-radius: 16px; padding: 20px 22px; display: grid; gap: 4px; box-shadow: 0 14px 30px -24px rgba(160, 50, 20, .5); }
+.pm-metric strong { font-size: clamp(48px, 4.6vw, 64px); font-weight: 600; letter-spacing: -0.045em; line-height: 1; color: var(--text); }
+.pm-metric strong::after { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 10px; vertical-align: top; background: linear-gradient(135deg, #FF7A3D, #D63BE0); }
+.pm-metric span { font-size: 15px; color: rgba(18, 16, 22, .78); }
+
+/* Today → With Botree */
+.pm-ba { background: rgba(255, 255, 255, .7); border: 1px solid #fff; border-radius: 16px; padding: 6px 20px; }
+.pm-ba-head, .pm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+.pm-ba-head { padding: 12px 0; border-bottom: 1px solid rgba(18, 16, 22, .08); font: 500 11.5px var(--mono); letter-spacing: .06em; color: var(--muted); }
+.pm-ba-head .with { color: #B83A0C; }
+.pm-row { padding: 14px 0; border-bottom: 1px solid rgba(18, 16, 22, .07); font-size: 15px; }
+.pm-row:last-child { border-bottom: 0; }
+.pm-row span { display: flex; align-items: flex-start; gap: 10px; }
+.pm-row i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; flex: none; margin-top: 1px; }
+.pm-row .was { color: var(--muted); }
+.pm-row .was i { background: rgba(18, 16, 22, .06); color: var(--muted); }
+.pm-row .now { color: var(--text); font-weight: 500; }
+.pm-row .now i { background: linear-gradient(135deg, #FF7A3D, #FF4F7B); color: #fff; }
+
+.pm-runs { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 500 11.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.pm-runs b { font: 500 13px var(--font); letter-spacing: 0; text-transform: none; color: var(--text); background: #fff; border: 1px solid rgba(18, 16, 22, .08); padding: 5px 10px; border-radius: 8px; }
+
+/* Contrast: label sits over the strongest orange glow */
+.pm-runs { color: #4A4552; }
+.pm-row .was, .pm-row .was i { color: #5A5561; }
+
+/* ==========================================================
+   Three people — Before / After cards
+   ========================================================== */
+
+.ba-switch-wrap { margin-bottom: 28px; }
+.ba-panel[hidden] { display: none; }
+.ba-who { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+.ba-av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 500 13px var(--mono); color: #fff; background: linear-gradient(135deg, #FF7A3D, #FF4F7B 70%, #D63BE0); flex: none; }
+.ba-who h3 { font-size: clamp(24px, 2.4vw, 32px); font-weight: 500; letter-spacing: -0.03em; }
+.ba-sub { font-size: 14.5px; color: var(--muted); padding-left: 14px; border-left: 1px solid var(--line); }
+
+/* Two cards with the arrows column between; rows share a fixed height so pains line up with fixes */
+.ba-cols { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); align-items: stretch; }
+.ba-card { border-radius: 20px; padding: 24px 26px 18px; }
+.ba-k { font: 500 11.5px var(--mono); letter-spacing: .06em; margin-bottom: 8px; }
+.ba-card ul { display: grid; }
+.ba-card li { display: flex; align-items: center; gap: 12px; min-height: 64px; font-size: 16px; border-top: 1px solid rgba(18, 16, 22, .07); }
+.ba-card i { font-style: normal; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; flex: none; }
+
+.ba-before { background: var(--canvas); border: 1px solid var(--line); color: #5A5561; }
+.ba-before .ba-k { color: #5A5561; }
+.ba-before i { background: rgba(18, 16, 22, .07); color: #5A5561; }
+
+.ba-after {
+  color: var(--text); font-weight: 500; border: 1px solid #fff;
+  background:
+    radial-gradient(60% 80% at 0% 100%, rgba(255, 122, 61, .42) 0%, rgba(255, 122, 61, 0) 70%),
+    radial-gradient(50% 70% at 100% 0%, rgba(255, 79, 123, .3) 0%, rgba(255, 79, 123, 0) 70%),
+    radial-gradient(40% 50% at 100% 100%, rgba(214, 59, 224, .14) 0%, rgba(214, 59, 224, 0) 70%),
+    linear-gradient(160deg, #FFF5EE 0%, #FFE6D8 100%);
+  box-shadow: 0 24px 48px -30px rgba(160, 50, 20, .55);
+}
+.ba-after .ba-k { color: #B83A0C; }
+.ba-after li { border-top-color: rgba(18, 16, 22, .08); }
+.ba-after i { background: linear-gradient(135deg, #FF7A3D, #FF4F7B); color: #fff; }
+
+/* Arrows aligned with each row (header 8+~16px, then 64px rows) */
+.ba-arrows { display: grid; grid-template-rows: repeat(3, 64px); align-content: start; padding-top: 51px; justify-items: center; }
+.ba-arrows span { display: grid; place-items: center; align-self: center; width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid var(--line); color: #C2410C; font-size: 15px; }
+
+/* Metrics strip */
+.ba-strip { margin-top: 16px; display: grid; grid-template-columns: auto auto 1fr; gap: 0; align-items: center; border: 1px solid var(--line); border-radius: 20px; background: #fff; overflow: hidden; }
+.ba-metric { display: flex; align-items: baseline; gap: 14px; padding: 22px 28px; border-right: 1px solid var(--line); }
+.ba-metric strong { font-size: clamp(40px, 3.8vw, 52px); font-weight: 600; letter-spacing: -0.045em; line-height: 1; }
+.ba-metric span { font-size: 15px; color: #4A4552; max-width: 170px; line-height: 1.35; }
+.ba-runs { justify-self: end; padding: 0 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 500 11.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: #4A4552; }
+.ba-runs b { font: 500 13px var(--font); letter-spacing: 0; text-transform: none; color: var(--text); background: var(--canvas); border: 1px solid var(--line); padding: 5px 10px; border-radius: 8px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ba-panel:not([hidden]) .ba-after li { animation: baIn .45s var(--ease) both; }
+  .ba-panel:not([hidden]) .ba-after li:nth-child(2) { animation-delay: .08s; }
+  .ba-panel:not([hidden]) .ba-after li:nth-child(3) { animation-delay: .16s; }
+}
+@keyframes baIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+
+/* ==========================================================
+   Open layout + orange → purple accents (no section containers)
+   ========================================================== */
+/* "Most AI starts…" and "Three people…" sit on the page canvas like the metrics section */
+.cio-x { background: transparent; border: 0; border-radius: 0; margin: 0; overflow: visible; }
+.cio-x > .container.section-inner { padding-block: clamp(56px, 7vw, 96px); }
+
+/* Before card stays readable on the canvas */
+.ba-before { background: #fff; }
+
+/* With Botree: orange → purple, not orange alone */
+.ba-after {
+  background:
+    radial-gradient(60% 85% at 0% 100%, rgba(255, 122, 61, .4) 0%, rgba(255, 122, 61, 0) 70%),
+    radial-gradient(60% 85% at 100% 0%, rgba(214, 59, 224, .32) 0%, rgba(214, 59, 224, 0) 70%),
+    radial-gradient(45% 60% at 60% 60%, rgba(255, 79, 123, .2) 0%, rgba(255, 79, 123, 0) 70%),
+    linear-gradient(135deg, #FFF3EC 0%, #F8E7F8 100%);
+  box-shadow: 0 24px 48px -30px rgba(140, 40, 120, .5);
+}
+.ba-after .ba-k { color: #8E2AA8; }
+.ba-after i { background: linear-gradient(135deg, #FF7A3D, #FF4F7B 55%, #D63BE0); }
+.ba-arrows span { color: #A0309E; border-color: #EBD6EE; }
+
+/* Container restored for the "Most AI starts with a model" section only */
+.cio-x.cio-flow { background: #fff; border: 1px solid var(--line); border-radius: var(--r-xl); margin: 0 var(--inset) 12px; overflow: hidden; }

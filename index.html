@@ -327,69 +327,71 @@
     </div>
   </section>
 
-  <!-- Three people (simple switcher, white) -->
-  <section class="shell people" aria-labelledby="persona-title">
+  <!-- Three people — Before / After -->
+  <section class="shell cio-x people-ba" aria-labelledby="persona-title">
     <div class="container section-inner">
-      <div class="head-center reveal">
+      <div class="cx-head reveal">
         <h2 class="h2" id="persona-title">Three people decide your growth every day.</h2>
         <p class="lead">See what changes for each of them with Botree.</p>
       </div>
 
-      <div class="pp-switch-wrap reveal">
+      <div class="ba-switch-wrap">
         <div class="pp-switch" role="tablist" aria-label="Three people" data-tabs>
-          <button class="pp-opt" type="button" role="tab" aria-selected="true" aria-controls="pp-dist" id="pt-dist">The distributor</button>
-          <button class="pp-opt" type="button" role="tab" aria-selected="false" aria-controls="pp-sales" id="pt-sales" tabindex="-1">The salesperson</button>
-          <button class="pp-opt" type="button" role="tab" aria-selected="false" aria-controls="pp-ret" id="pt-ret" tabindex="-1">The retailer</button>
+          <button class="pp-opt" type="button" role="tab" aria-selected="true" aria-controls="ba-dist" id="bt-dist">The distributor</button>
+          <button class="pp-opt" type="button" role="tab" aria-selected="false" aria-controls="ba-sales" id="bt-sales" tabindex="-1">The salesperson</button>
+          <button class="pp-opt" type="button" role="tab" aria-selected="false" aria-controls="ba-ret" id="bt-ret" tabindex="-1">The retailer</button>
         </div>
       </div>
 
       <!-- The distributor -->
-      <div class="pp-panel" role="tabpanel" id="pp-dist" aria-labelledby="pt-dist">
-        <div class="pp-main">
-          <p class="pp-who"><span class="pp-av" aria-hidden="true">D</span><span>Decides how much to carry</span></p>
-          <h3 class="pp-title">Orders for real demand.</h3>
-          <table class="pp-table">
-            <thead><tr><th scope="col">TODAY</th><th scope="col"><span class="sr-only">changes to</span></th><th scope="col" class="with">WITH BOTREE</th></tr></thead>
-            <tbody>
-              <tr><td class="today">Holds back while claims are pending</td><td class="arr" aria-hidden="true">→</td><td class="now">Claims settle on time</td></tr>
-              <tr><td class="today">Fast lines sell out midweek</td><td class="arr" aria-hidden="true">→</td><td class="now">Restocks before the shelf runs out</td></tr>
-              <tr><td class="today">Orders on instinct</td><td class="arr" aria-hidden="true">→</td><td class="now">Orders from real secondary sales</td></tr>
-            </tbody>
-          </table>
-          <p class="pp-runs">Runs on <b>Botree DMS</b><b>Botree FlexiDMS</b></p>
+      <div class="ba-panel" role="tabpanel" id="ba-dist" aria-labelledby="bt-dist">
+        <div class="ba-who"><span class="ba-av" aria-hidden="true">D</span><h3>Orders for real demand.</h3><span class="ba-sub">Decides how much to carry</span></div>
+        <div class="ba-cols">
+          <div class="ba-card ba-before">
+            <p class="ba-k">TODAY</p>
+            <ul>
+              <li><i aria-hidden="true">✕</i>Holds back while claims are pending</li>
+              <li><i aria-hidden="true">✕</i>Fast lines sell out midweek</li>
+              <li><i aria-hidden="true">✕</i>Orders on instinct</li>
+            </ul>
+          </div>
+          <div class="ba-arrows" aria-hidden="true"><span>→</span><span>→</span><span>→</span></div>
+          <div class="ba-card ba-after">
+            <p class="ba-k">WITH BOTREE</p>
+            <ul>
+              <li><i aria-hidden="true">✓</i>Claims settle on time</li>
+              <li><i aria-hidden="true">✓</i>Restocks before the shelf runs out</li>
+              <li><i aria-hidden="true">✓</i>Orders from real secondary sales</li>
+            </ul>
+          </div>
         </div>
-        <div class="pp-kpis">
-          <div class="pp-kpi ink"><strong>85%</strong><span>faster order-to-billing</span></div>
-          <div class="pp-kpi purple"><strong>100%</strong><span>visibility into secondary sales</span></div>
+        <div class="ba-strip">
+          <div class="ba-metric"><strong>85%</strong><span>faster order-to-billing</span></div>
+          <div class="ba-metric"><strong>100%</strong><span>visibility into secondary sales</span></div>
+          <p class="ba-runs">Runs on <b>Botree DMS</b><b>Botree FlexiDMS</b></p>
         </div>
       </div>
 
       <!-- The salesperson -->
-      <div class="pp-panel" role="tabpanel" id="pp-sales" aria-labelledby="pt-sales" hidden>
-        <div class="pp-main">
-          <p class="pp-who"><span class="pp-av" aria-hidden="true">S</span><span>Decides where your growth goes</span></p>
-          <h3 class="pp-title"><span class="todo">[The salesperson — panel title to supply]</span></h3>
-          <p><span class="todo">[TODAY → WITH BOTREE rows to supply]</span></p>
-          <p class="pp-runs">Runs on <span class="todo">[products to supply]</span></p>
+      <div class="ba-panel" role="tabpanel" id="ba-sales" aria-labelledby="bt-sales" hidden>
+        <div class="ba-who"><span class="ba-av" aria-hidden="true">S</span><h3><span class="todo">[The salesperson — panel title to supply]</span></h3><span class="ba-sub">Decides where your growth goes</span></div>
+        <div class="ba-cols">
+          <div class="ba-card ba-before"><p class="ba-k">TODAY</p><p><span class="todo">[rows to supply]</span></p></div>
+          <div class="ba-arrows" aria-hidden="true"></div>
+          <div class="ba-card ba-after"><p class="ba-k">WITH BOTREE</p><p><span class="todo">[rows to supply]</span></p></div>
         </div>
-        <div class="pp-kpis">
-          <div class="pp-kpi ink"><span class="todo">[KPI 1 to supply]</span></div>
-          <div class="pp-kpi purple"><span class="todo">[KPI 2 to supply]</span></div>
-        </div>
+        <div class="ba-strip"><div class="ba-metric"><span class="todo">[KPI 1 to supply]</span></div><div class="ba-metric"><span class="todo">[KPI 2 to supply]</span></div><p class="ba-runs">Runs on <span class="todo">[products to supply]</span></p></div>
       </div>
 
       <!-- The retailer -->
-      <div class="pp-panel" role="tabpanel" id="pp-ret" aria-labelledby="pt-ret" hidden>
-        <div class="pp-main">
-          <p class="pp-who"><span class="pp-av" aria-hidden="true">R</span><span>Decides who earns the shelf</span></p>
-          <h3 class="pp-title"><span class="todo">[The retailer — panel title to supply]</span></h3>
-          <p><span class="todo">[TODAY → WITH BOTREE rows to supply]</span></p>
-          <p class="pp-runs">Runs on <span class="todo">[products to supply]</span></p>
+      <div class="ba-panel" role="tabpanel" id="ba-ret" aria-labelledby="bt-ret" hidden>
+        <div class="ba-who"><span class="ba-av" aria-hidden="true">R</span><h3><span class="todo">[The retailer — panel title to supply]</span></h3><span class="ba-sub">Decides who earns the shelf</span></div>
+        <div class="ba-cols">
+          <div class="ba-card ba-before"><p class="ba-k">TODAY</p><p><span class="todo">[rows to supply]</span></p></div>
+          <div class="ba-arrows" aria-hidden="true"></div>
+          <div class="ba-card ba-after"><p class="ba-k">WITH BOTREE</p><p><span class="todo">[rows to supply]</span></p></div>
         </div>
-        <div class="pp-kpis">
-          <div class="pp-kpi ink"><span class="todo">[KPI 1 to supply]</span></div>
-          <div class="pp-kpi purple"><span class="todo">[KPI 2 to supply]</span></div>
-        </div>
+        <div class="ba-strip"><div class="ba-metric"><span class="todo">[KPI 1 to supply]</span></div><div class="ba-metric"><span class="todo">[KPI 2 to supply]</span></div><p class="ba-runs">Runs on <span class="todo">[products to supply]</span></p></div>
       </div>
     </div>
   </section>

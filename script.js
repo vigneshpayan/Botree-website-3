@@ -20,6 +20,29 @@
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
 
+  /* ---------- Smart nav: hide on scroll down, reveal on scroll up ---------- */
+  (function smartNav() {
+    let lastY = window.scrollY, ticking = false;
+    const SHOW_ZONE = 160;   // always visible near the top
+    const DELTA = 6;         // ignore tiny jitters
+    function update() {
+      ticking = false;
+      const y = window.scrollY;
+      const menuOpen = !!document.querySelector('.mega.open') || document.getElementById('drawer')?.classList.contains('open');
+      if (y < SHOW_ZONE || menuOpen) {
+        header.classList.remove('nav-hidden');
+      } else if (y > lastY + DELTA) {
+        header.classList.add('nav-hidden');
+      } else if (y < lastY - DELTA) {
+        header.classList.remove('nav-hidden');
+      }
+      if (Math.abs(y - lastY) > DELTA) lastY = y;
+    }
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    // Keyboard users: reveal the nav whenever focus moves into it
+    header.addEventListener('focusin', () => header.classList.remove('nav-hidden'));
+  })();
+
   /* ---------- Mega menus ---------- */
   const scrim = $('#scrim');
   const triggers = $$('.nav-trigger');
@@ -93,6 +116,34 @@
   }
   setupTabs($('.mega-tabs'));
   $$('[data-tabs]').forEach(tl => setupTabs(tl));
+
+  /* ---------- Three people: metrics count up when a panel appears ---------- */
+  (function () {
+    const panels = $$('.tp-panel');
+    if (!panels.length) return;
+    function countUp(panel) {
+      $$('[data-tp-count]', panel).forEach(el => {
+        const to = +el.dataset.tpCount, suf = el.dataset.suffix || '';
+        if (reduceMotion) { el.textContent = to + suf; return; }
+        const t0 = performance.now(), dur = 900;
+        (function tick(now) {
+          const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(to * e) + suf;
+          if (p < 1) requestAnimationFrame(tick);
+        })(t0);
+      });
+    }
+    // Re-run when a panel is un-hidden by the tabs
+    const mo = new MutationObserver(muts => muts.forEach(m => { if (!m.target.hidden) countUp(m.target); }));
+    panels.forEach(p => mo.observe(p, { attributes: true, attributeFilter: ['hidden'] }));
+    // First run when the section scrolls into view
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(es => es.forEach(e => {
+        if (e.isIntersecting) { countUp(panels.find(p => !p.hidden)); io.disconnect(); }
+      }), { threshold: 0.4 });
+      io.observe($('.tp-stage'));
+    }
+  })();
 
   /* ---------- Testimonials: logo tabs + arrows ---------- */
   let tIndex = 0;

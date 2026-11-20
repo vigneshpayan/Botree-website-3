@@ -2992,3 +2992,4 @@ html, body { overflow-x: clip; }
   .btn.btn-ink, .btn.btn-demo { transition: background-size .45s cubic-bezier(.65, 0, .35, 1), box-shadow .3s var(--ease); }
 }
 .btn.btn-ink:focus-visible { outline: 2px solid #FF4F7B; outline-offset: 3px; }
+.btn-demo .orb-bt svg, .btn.btn-demo:hover .orb-bt svg { stroke: #fff; }

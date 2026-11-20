@@ -151,110 +151,191 @@
   $('[data-t-prev]').addEventListener('click', () => tTabs.select(tIndex - 1));
   $('[data-t-next]').addEventListener('click', () => tTabs.select(tIndex + 1));
 
-  /* ---------- Carton journey (vertical timeline) ---------- */
+  /* ---------- Carton journey (immersive player) ---------- */
   (function journey() {
-    const TODO = 'copy to supply';
-    // Index 1 is the only stop shown in the reference; the others render marked placeholders.
+    // DUMMY COPY: stops 3–8 are draft content written (stop 1 is client copy, stop 2 is from the site PDF)
+    // for layout. It must be confirmed or replaced by the client before launch.
     const STOPS = [
-      { label: 'Factory and HQ' },
-      {
-        label: 'Primary dispatch', time: '8:30 am',
+      // Stop 1: client-supplied copy (from the client's layout)
+      { rider: 'truck', phase: 'morning', time: '6:00 am', step: 'Stop 1 of 8 · Brand and sales leadership',
+        tip: 'The month’s plan is approved and goes out to the market.',
+        h: 'The plan is made. Now it has to reach 5 million shelves.',
+        p: 'National targets, price lists and schemes are set at headquarters and pushed to the market through your ERP.',
+        wrong: 'The plan is national, but growth is won outlet by outlet. Targets and schemes lose their shape on the way down.',
+        prod: ['ERP connectors', 'RnA'],
+        ticks: ['Two-way sync with SAP, Tally and your ERP, so the plan reaches the market as set', 'Schemes defined once and carried to every distributor, rep and retailer'],
+        prism: 'Target Disaggregation breaks national targets down to every rep and outlet, and Scheme Simulation tests a scheme before spend is committed.',
+        outcome: 'Targets reach every rep and outlet the way the plan intended' },
+      { rider: 'truck', phase: 'morning', time: '8:30 am', step: 'Stop 2 of 8 · The distributor',
         tip: 'Cartons leave the depot for the distributor’s warehouse.',
-        step: 'Stop 2 of 8 · The distributor',
         h: 'The distributor decides how much of your brand to carry.',
         p: 'The distributor places a primary order and stock is dispatched from your depot.',
         wrong: 'He orders on instinct and last month’s numbers, and holds back while claims are pending. Fast lines run short midweek.',
         prod: 'Botree DMS',
         ticks: ['Primary orders suggested from real secondary sales', 'Claims and schemes settled on time, so he orders for real demand', 'Stock visibility across every distributor'],
         prism: 'Auto Replenishment suggests the next order before fast lines run out.',
-        stat: '32%', statLabel: 'improvement in fill rates'
-      },
-      { label: 'Distributor warehouse' },
-      { label: 'On the beat' },
-      { label: 'At the store counter' },
-      { label: 'In-store execution' },
-      { label: 'Store, after hours' },
-      { label: 'Back to HQ' }
+        stat: '32%', statLabel: 'improvement in fill rates' },
+      { rider: 'truck', phase: 'morning', time: '11:00 am', step: 'Stop 3 of 8 · The distributor',
+        tip: 'Cartons are received, billed and stored for the beat.',
+        h: 'Every case is billed, stored and claimed.',
+        p: 'The distributor receives stock, bills retailers and files claims for the schemes he ran.',
+        wrong: 'Billing is keyed in by hand, claims sit in paperwork for weeks, and slow stock ages unseen.',
+        prod: 'Botree DMS',
+        ticks: ['E-invoice and e-way bill built into billing', 'Claims calculated from actual scheme sales', 'Stock ageing visible before it expires'],
+        prism: 'Fraudulent distributor analysis flags claims that don’t match real sales.',
+        stat: '85%', statLabel: 'faster order-to-billing' },
+      { rider: 'rep', phase: 'field', time: '1:30 pm', step: 'Stop 4 of 8 · The salesperson',
+        tip: 'The rep starts the beat with the day’s plan on the phone.',
+        h: 'The salesperson decides where your growth goes.',
+        p: 'The rep visits outlets on the beat, takes orders and checks what’s on the shelf.',
+        wrong: 'The same route every week. Slipping outlets get missed, and orders depend on memory.',
+        prod: 'Botree SFA',
+        ticks: ['Beat planned around the outlets that need a visit', 'A suggested order ready at every outlet', 'Visits verified with GPS and time stamps'],
+        prism: 'Route Optimization reshapes the beat, and Product Recommender suggests the order.',
+        stat: '12%', statLabel: 'increase in product assortment' },
+      { rider: 'store', phase: 'field', time: '3:00 pm', step: 'Stop 5 of 8 · The retailer',
+        tip: 'Your carton reaches the store counter.',
+        h: 'The retailer decides who earns the shelf.',
+        p: 'The retailer chooses what to stock, how much, and which schemes are worth it.',
+        wrong: 'He orders what the rep remembers to mention, and rarely hears about the latest scheme.',
+        prod: 'Botree Retailer App',
+        ticks: ['Live schemes and offers on his own phone', 'Past orders ready to repeat in one tap', 'Delivery status he can track'],
+        prism: 'AI Ordering prepares the order from buying patterns and live schemes.',
+        stat: 'One tap', statLabel: 'to confirm a suggested order' },
+      { rider: 'store', phase: 'field', time: '4:30 pm', step: 'Stop 6 of 8 · Rep and retailer',
+        tip: 'Your brand goes on the shelf.',
+        h: 'Your brand shows up the way it was planned.',
+        p: 'The rep checks shelf placement, displays and range against the plan.',
+        wrong: 'Displays go up late or not at all, and nobody at HQ knows until the month ends.',
+        prod: 'Botree SFA',
+        ticks: ['Photo audits of shelves and displays', 'Range gaps listed outlet by outlet', 'Merchandising tasks assigned to the beat'],
+        prism: 'AI Nudges prompt the rep on range gaps and low stock while still in the store.',
+        stat: 'Same day', statLabel: 'range gaps closed' },
+      { rider: 'store', phase: 'night', time: '9:00 pm', step: 'Stop 7 of 8 · The retailer',
+        tip: 'The store closes. The shelf keeps telling you what sold.',
+        h: 'The shelf reorders itself after closing.',
+        p: 'After closing, the retailer checks what sold and tops up for tomorrow.',
+        wrong: 'Reorders wait for the next rep visit, so fast lines sit empty for days.',
+        prod: 'Botree Retailer App',
+        ticks: ['Reorder anytime, not only on visit days', 'Suggested quantities from what actually sold', 'The order goes straight to the distributor'],
+        prism: 'Product Recommender suggests what to reorder before the shelf runs dry.',
+        stat: 'Before morning', statLabel: 'reorders reach the distributor' },
+      { rider: 'signal', phase: 'night', time: '11:00 pm', step: 'Stop 8 of 8 · Your HQ',
+        tip: 'The day’s sales travel back to HQ.',
+        h: 'Every sale comes back as tomorrow’s decision.',
+        p: 'Orders, visits and sales from the day flow back to HQ overnight.',
+        wrong: 'Secondary sales arrive weeks late in spreadsheets, so decisions run on old numbers.',
+        prod: 'Botree Prism',
+        ticks: ['Secondary sales visible by distributor, beat and outlet', 'Channel performance tracked every day', 'Tomorrow’s targets and beats adjusted from today’s sales'],
+        prism: 'Outletpulse and the Channel Performance Dashboard show what to fix tomorrow.',
+        stat: '100%', statLabel: 'visibility into secondary sales' }
     ];
 
+    const section = $('#journey');
+    const player = $('#jx-player');
     const timeline = $('#timeline');
+    if (!section || !timeline) return;
     const items = $$('.tl-stop', timeline);
     const buttons = items.map(li => $('.tl-btn', li));
+    const segs = $$('.jx-prog i', player);
     const detail = $('#j-detail');
     const fillEl = $('#tl-fill');
-    const truck = $('#tl-truck');
+    const rider = $('#tl-truck');
     const lineEl = $('.tl-line', timeline);
-    const time = $('#j-time');
     const playBtn = $('[data-j-play]');
-    let idx = 1, timer = null, playing = !reduceMotion, hold = false;
+    const ring = $('.jx-ring circle', player);
+    let idx = 1, playing = !reduceMotion, hold = false, visible = false, rmTimer = null;
+    const SKY = ['dawn', 'morning', 'morning', 'day', 'day', 'dusk', 'night', 'night'];
+    const caption = $('#j-tip'), sun = $('#jr-sun');
 
-    const todo = text => { const s = document.createElement('span'); s.className = 'todo'; s.textContent = `[${text} — ${TODO}]`; return s; };
-    const setText = (el, value, placeholder) => { el.textContent = ''; el.append(value ? document.createTextNode(value) : todo(placeholder)); };
-    const labelled = (el, label, value, placeholder) => {
-      el.textContent = '';
-      const b = document.createElement('b'); b.textContent = label;
-      el.append(b, document.createTextNode(' '), value ? document.createTextNode(value) : todo(placeholder));
-    };
+    const set = (id, v) => { $(id).textContent = v; };
 
     function position() {
       const dot = $('.dot', buttons[idx]);
       const t = timeline.getBoundingClientRect();
       const d = dot.getBoundingClientRect();
       const l = lineEl.getBoundingClientRect();
-      const y = d.top + d.height / 2;
-      fillEl.style.height = Math.max(0, y - l.top) + 'px';
-      truck.style.top = (y - t.top) + 'px';
+      const x = d.left + d.width / 2;
+      fillEl.style.width = Math.max(0, x - l.left) + 'px';
+      rider.style.left = (x - t.left) + 'px';
+      if (caption) {
+        const half = Math.min(caption.offsetWidth / 2, t.width / 2);
+        caption.style.left = Math.min(Math.max(x - t.left, half + 16), t.width - half - 16) + 'px';
+      }
+      if (sun) {
+        const p = idx / (STOPS.length - 1);
+        sun.style.left = (6 + p * 88) + '%';
+        sun.style.top = (54 - Math.sin(Math.PI * Math.min(p, .85) / .85) * 34) + 'px';
+      }
     }
 
     function render(animate) {
       const s = STOPS[idx];
       items.forEach((li, i) => {
-        const on = i === idx;
-        li.classList.toggle('active', on);
-        buttons[i].setAttribute('aria-expanded', String(on));
+        li.classList.toggle('active', i === idx);
+        li.classList.toggle('past', i < idx);
+        buttons[i].setAttribute('aria-expanded', String(i === idx));
       });
-      items[idx].appendChild(detail);
-      setText(time, s.time, 'time');
-      setText($('#j-tip'), s.tip, `Stop ${idx + 1} caption`);
-      setText($('#j-step'), s.step, `Stop ${idx + 1} of 8 label`);
-      setText($('#j-h'), s.h, `${s.label} headline`);
-      setText($('#j-p'), s.p, `${s.label} description`);
-      labelled($('#j-wrong'), 'What usually goes wrong:', s.wrong, 'what goes wrong');
-      setText($('#j-prod'), s.prod, 'product');
+      set('#j-time', s.time); set('#j-step', s.step); set('#j-tip', s.tip);
+      set('#j-h', s.h); set('#j-p', s.p); set('#j-wrong', s.wrong); set('#j-prism-t', s.prism);
+      const tags = $('#j-prod'); tags.textContent = '';
+      [].concat(s.prod).forEach(p => { const t = document.createElement('span'); t.textContent = p; tags.append(t); });
       const ticks = $('#j-ticks'); ticks.textContent = '';
-      (s.ticks || [null]).forEach(t => { const li = document.createElement('li'); li.append(t ? document.createTextNode(t) : todo('with-Botree points')); ticks.append(li); });
-      labelled($('#j-prism'), 'Prism here:', s.prism, 'Prism module');
-      const fill = $('#j-fill'); fill.textContent = '';
-      if (s.stat) {
+      s.ticks.forEach(t => { const li = document.createElement('li'); li.textContent = t; ticks.append(li); });
+      const out = $('#j-fill'); out.textContent = '';
+      out.classList.toggle('is-text', !!s.outcome);
+      if (s.outcome) {
+        const b = document.createElement('b'); b.textContent = 'OUTCOME';
+        const o = document.createElement('span'); o.textContent = s.outcome;
+        out.append(b, o);
+      } else {
         const fs = document.createElement('strong'); fs.textContent = s.stat;
         const fl = document.createElement('span'); fl.textContent = s.statLabel;
-        fill.append(fs, fl);
-      } else fill.append(todo('stat'));
-      if (animate && !reduceMotion) { detail.classList.remove('j-anim'); void detail.offsetWidth; detail.classList.add('j-anim'); }
+        out.append(fs, fl);
+      }
+      section.dataset.phase = s.phase;
+      section.dataset.sky = SKY[idx];
+      if (rider.dataset.rider !== s.rider) rider.dataset.rider = s.rider;
+      if (animate && !reduceMotion) {
+        detail.classList.remove('j-anim'); caption.classList.remove('pop');
+        void detail.offsetWidth;
+        detail.classList.add('j-anim'); caption.classList.add('pop');
+        timeline.classList.add('driving');
+        clearTimeout(render.t); render.t = setTimeout(() => timeline.classList.remove('driving'), 1200);
+      }
       requestAnimationFrame(position);
     }
 
+    function updatePaused() { player.classList.toggle('paused', hold || !visible || document.hidden); }
+    function restartCount() {
+      player.classList.remove('counting');
+      void player.offsetWidth;
+      if (playing && !reduceMotion) player.classList.add('counting');
+    }
     function go(i, focus) {
       idx = (i + STOPS.length) % STOPS.length;
       render(true);
+      restartCount();
       if (focus) buttons[idx].focus();
-    }
-    function tick() {
-      if (!playing || hold || document.hidden) return;
-      const r = timeline.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > window.innerHeight) return; // advance only while visible
-      go(idx + 1);
     }
     function setPlaying(on) {
       playing = on;
-      playBtn.textContent = on ? 'Pause' : 'Play';
-      playBtn.setAttribute('aria-pressed', String(!on));
-      clearInterval(timer);
-      if (on) timer = setInterval(tick, 6500);
+      player.classList.toggle('is-playing', on);
+      playBtn.setAttribute('aria-label', on ? 'Pause journey' : 'Play journey');
+      clearInterval(rmTimer);
+      if (reduceMotion && on) rmTimer = setInterval(() => { if (!hold && visible && !document.hidden) go(idx + 1); }, 6500);
+      restartCount();
     }
 
+    // The countdown ring drives autoplay: when it completes, advance.
+    ring.addEventListener('animationend', () => { if (playing) go(idx + 1); });
+
     buttons.forEach((b, i) => {
-      b.addEventListener('click', () => { setPlaying(false); go(i); });
+      b.addEventListener('click', () => go(i));
+      // Hover drives the journey too: rest on a stop briefly and the vehicle drives there
+      let hoverT = null;
+      b.addEventListener('mouseenter', () => { clearTimeout(hoverT); hoverT = setTimeout(() => { if (i !== idx) go(i); }, 140); });
+      b.addEventListener('mouseleave', () => clearTimeout(hoverT));
       b.addEventListener('keydown', e => {
         let j = null;
         if (e.key === 'ArrowDown' || e.key === 'ArrowRight') j = i + 1;
@@ -263,17 +344,24 @@
         if (j !== null) { e.preventDefault(); setPlaying(false); go(j, true); }
       });
     });
-    $('[data-j-prev]').addEventListener('click', () => { setPlaying(false); go(idx - 1); });
-    $('[data-j-next]').addEventListener('click', () => { setPlaying(false); go(idx + 1); });
-    playBtn.addEventListener('click', () => setPlaying(!playing));
-    timeline.addEventListener('mouseenter', () => { hold = true; });
-    timeline.addEventListener('mouseleave', () => { hold = false; });
-    timeline.addEventListener('focusin', () => { hold = true; });
-    timeline.addEventListener('focusout', () => { hold = false; });
+    $('[data-j-prev]').addEventListener('click', () => go(idx - 1));
+    $('[data-j-next]').addEventListener('click', () => go(idx + 1));
+    // Only the Pause button stops the loop for good; hovering the road just holds it
+    let userPaused = false;
+    playBtn.addEventListener('click', () => { userPaused = playing; setPlaying(!playing); });
+    timeline.addEventListener('mouseenter', () => { hold = true; updatePaused(); });
+    timeline.addEventListener('mouseleave', () => { hold = false; updatePaused(); if (!userPaused && !reduceMotion && !playing) setPlaying(true); });
+    timeline.addEventListener('focusin', () => { hold = true; updatePaused(); });
+    timeline.addEventListener('focusout', () => { hold = false; updatePaused(); });
+    document.addEventListener('visibilitychange', updatePaused);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; updatePaused(); }, { threshold: 0.35 }).observe(player);
+    } else visible = true;
     window.addEventListener('resize', position);
     window.addEventListener('load', position);
     if ('ResizeObserver' in window) new ResizeObserver(position).observe(timeline);
 
+    updatePaused();
     render(false);
     setPlaying(playing);
   })();
@@ -310,17 +398,6 @@
       b.addEventListener('mouseleave', off); b.addEventListener('blur', off);
     });
 
-    // Idle auto-cycle through the sources while the diagram is on screen
-    if (reduceMotion) return;
-    function tick() {
-      if (user || document.hidden) return;
-      const r = fd.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > window.innerHeight) return;
-      auto = (auto + 1) % ins.length;
-      setActive(auto, auto % outs.length);
-    }
-    timer = setInterval(tick, 1800);
-    fd.addEventListener('mouseleave', () => { if (!user) setActive(null, null); });
   })();
 
   /* ---------- Mobile drawer ---------- */
@@ -411,4 +488,114 @@
   } else {
     $$('.reveal').forEach(el => el.classList.add('in'));
   }
+})();
+
+/* Three people: headline icons select the matching person (mouse shortcut; the tabs stay the keyboard path) */
+(function () {
+  var tabs = document.querySelectorAll('.tw-list [role="tab"]');
+  document.querySelectorAll('.tw-faces i').forEach(function (f) {
+    f.addEventListener('click', function () { var t = tabs[+f.dataset.i]; if (t) t.click(); });
+  });
+})();
+
+/* Integration orbit: hovering a card lights its connection to Botree */
+(function () {
+  var stage = document.getElementById('ox');
+  if (!stage) return;
+  stage.querySelectorAll('.ox-node').forEach(function (n) {
+    n.addEventListener('mouseenter', function () { stage.dataset.hot = n.dataset.s; });
+    n.addEventListener('mouseleave', function () { delete stage.dataset.hot; });
+  });
+})();
+
+/* Integration orbit — True orbit: chips travel the rings, stay upright, pause on hover */
+(function () {
+  var stage = document.getElementById('ox');
+  if (!stage) return;
+  var nodes = Array.prototype.slice.call(stage.querySelectorAll('.ox-node'));
+  var spokes = nodes.map(function (n) { return stage.querySelector('.ox-spoke[data-s="' + n.dataset.s + '"]'); });
+  var RINGS = { 1: [150, 150], 2: [228, 228], 3: [306, 306] }, CX = 600, CY = 330;
+  var SPEED = { 1: 0.07, 2: 0.07, 3: 0.07 };        // one shared speed keeps the six chips evenly spaced        // radians per second
+  var ang = nodes.map(function (n) { return (+n.dataset.a) * Math.PI / 180; });
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var visible = false, last = 0;
+
+  function place() {
+    nodes.forEach(function (n, i) {
+      var r = RINGS[n.dataset.ring], a = ang[i];
+      var x = CX + r[0] * Math.cos(a), y = CY + r[1] * Math.sin(a);
+      var depth = (Math.sin(a) + 1) / 2;                // 0 = back (top), 1 = front (bottom)
+      n.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) translate(-50%,-50%)';
+      n.style.zIndex = n.matches(':hover, :focus') ? 20 : 3 + Math.round(depth * 10);
+      if (spokes[i]) spokes[i].setAttribute('d', 'M' + x.toFixed(1) + ' ' + y.toFixed(1) + ' L600 280');
+    });
+  }
+  function frame(t) {
+    var dt = last ? Math.min((t - last) / 1000, 0.05) : 0;
+    last = t;
+    if (visible && !stage.dataset.hot && !document.hidden) {
+      nodes.forEach(function (n, i) { ang[i] += SPEED[n.dataset.ring] * dt; });
+      place();
+    }
+    requestAnimationFrame(frame);
+  }
+  nodes.forEach(function (n) {
+    n.addEventListener('focus', function () { stage.dataset.hot = n.dataset.s; place(); });
+    n.addEventListener('blur', function () { delete stage.dataset.hot; });
+    n.addEventListener('mouseenter', function () { requestAnimationFrame(place); });
+  });
+  place();
+  if (still) return;
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (e) { visible = e[0].isIntersecting; }).observe(stage);
+  else visible = true;
+  requestAnimationFrame(frame);
+})();
+
+/* Testimonials: split a leading number in each story headline into a big stat + label (text unchanged) */
+(function () {
+  document.querySelectorAll('.t-copy .tag').forEach(function (h) {
+    var text = h.textContent.trim();
+    var m = text.match(/^(\d[\d.,]*\s*[%+xX]?)\s+(.+)$/);
+    if (!m) { h.classList.add('t-word'); return; }
+    h.textContent = '';
+    var n = document.createElement('span'); n.className = 't-num'; n.textContent = m[1];
+    var l = document.createElement('span'); l.className = 't-lbl'; l.textContent = ' ' + m[2];
+    h.append(n, l);
+  });
+})();
+
+/* Footer wordmark (first version, aligned): a liquid-edged gradient spot follows the cursor; star sparkles trail it */
+(function () {
+  var wm = document.querySelector('.wm');
+  if (!wm || !window.matchMedia('(hover: hover)').matches) return;
+  var svg = wm.querySelector('.wm-svg'), spot = wm.querySelector('#wmSpot'), sparks = wm.querySelector('.wm-sparks');
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var COLORS = ['#FF7A3D', '#FF4F7B', '#D63BE0', '#FFB27A'];
+  var R = 260, cur = { x: -500, y: -500 }, tgt = { x: -500, y: -500 }, r = 0, want = 0, running = false, lastSpark = 0;
+
+  function toSvg(e) { var p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+  function frame() {
+    var k = still ? 1 : 0.18;
+    cur.x += (tgt.x - cur.x) * k; cur.y += (tgt.y - cur.y) * k;
+    r += (want - r) * (still ? 1 : 0.1);
+    spot.setAttribute('cx', cur.x.toFixed(1)); spot.setAttribute('cy', cur.y.toFixed(1)); spot.setAttribute('r', (R * r).toFixed(1));
+    if (r > 0.005 || want) requestAnimationFrame(frame); else running = false;
+  }
+  function kick() { if (!running) { running = true; requestAnimationFrame(frame); } }
+
+  wm.addEventListener('pointerenter', function (e) { var p = toSvg(e); tgt = { x: p.x, y: p.y }; cur = { x: p.x, y: p.y }; want = 1; wm.classList.add('on'); kick(); });
+  wm.addEventListener('pointerleave', function () { want = 0; wm.classList.remove('on'); kick(); });
+  wm.addEventListener('pointermove', function (e) {
+    var p = toSvg(e); tgt = { x: p.x, y: p.y }; kick();
+    if (still) return;
+    var now = performance.now();
+    if (now - lastSpark < 45 || sparks.childElementCount > 28) return;
+    lastSpark = now;
+    var w = wm.getBoundingClientRect(), s = document.createElement('i'), size = 6 + Math.random() * 12;
+    s.className = 'wm-spark v1';
+    s.style.cssText = 'left:' + (e.clientX - w.left + (Math.random() - .5) * 60) + 'px;top:' + (e.clientY - w.top + (Math.random() - .5) * 60) +
+      'px;width:' + size + 'px;height:' + size + 'px;--c:' + COLORS[(Math.random() * COLORS.length) | 0] + ';--dx:' + ((Math.random() - .5) * 40) + 'px;--dy:' + (-20 - Math.random() * 40) + 'px';
+    s.addEventListener('animationend', function () { s.remove(); });
+    sparks.appendChild(s);
+  });
 })();

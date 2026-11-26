@@ -375,7 +375,7 @@ ol, ul { padding: 0; list-style: none; }
 
 /* ---------- 05 Proof ---------- */
 .stats { margin-top: clamp(24px, 4vw, 48px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: clamp(24px, 4vw, 64px); align-items: end; }
-.stat-hero b { display: block; font: 600 clamp(80px, 11vw, 168px)/0.85 var(--display); letter-spacing: -0.05em; background: var(--warm); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stat-hero b { display: block; font: 600 clamp(80px, 11vw, 168px)/0.85 var(--display); letter-spacing: -0.05em; color: #fff; }
 .stat-hero span { font: 500 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted-dark); }
 .stat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .stat-grid div { padding: 18px 0 18px 18px; border-left: 1px solid rgba(255, 255, 255, .14); border-top: 1px solid rgba(255, 255, 255, .14); }

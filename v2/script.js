@@ -17,10 +17,14 @@
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  /* ---------- Hero map: HQ → distributors → reps → shelves ---------- */
-  (function map() {
+  /* Hero visual: option A by default; ?hero=b (data → hub → cards) or ?hero=c (Prism refraction) to compare */
+  const heroSvg = $('#map');
+  if (heroSvg) { const h = new URLSearchParams(location.search).get('hero'); heroSvg.dataset.hero = ['b', 'c'].includes(h) ? h : 'a'; }
+
+  /* ---------- Hero visual C: raw RTM data → Botree Prism → outcomes ---------- */
+  (function prismHero() {
     const svg = $('#map');
-    if (!svg) return;
+    if (!svg || svg.dataset.hero !== 'c') return;
     const el = (tag, attrs, parent = svg) => {
       const n = document.createElementNS(SVGNS, tag);
       for (const k in attrs) n.setAttribute(k, attrs[k]);
@@ -28,47 +32,255 @@
       return n;
     };
     const defs = el('defs', {});
-    const g = el('linearGradient', { id: 'mapGrad', x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
-    [['0', '#FF7A45'], ['.55', '#F72585'], ['1', '#8B3DFF']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, g));
+    const blur = (id, sd) => { const f = el('filter', { id, x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs); el('feGaussianBlur', { stdDeviation: sd }, f); };
+    blur('pzGlow', 18); blur('pzSoft', 4); blur('pzFloor', 8);
+    const pg = el('linearGradient', { id: 'pzBody', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
+    [['0', '#FFFFFF'], ['.6', '#F6F0FD'], ['1', '#E6D8FA']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, pg));
 
-    const HQ = [56, 230];
-    const D = [[200, 100], [200, 230], [200, 360]];
-    const R = [[340, 60], [340, 140], [340, 200], [340, 260], [340, 320], [340, 400]];
-    const S = [];
-    for (let i = 0; i < 16; i++) S.push([500, 28 + i * 26]);
-    const curve = ([x1, y1], [x2, y2]) => `M${x1} ${y1} C${(x1 + x2) / 2} ${y1} ${(x1 + x2) / 2} ${y2} ${x2} ${y2}`;
+    // Prism (centre) and the beam geometry
+    const C = [250, 220], H = 55;               // centre, half size
+    const L = C[0] - H, R = C[0] + H;
+    const INS = [['Distributor billing', 112], ['Field visits', 166], ['Retailer orders', 226], ['Claims', 280], ['Schemes', 336]];
+    const OUTS = [
+      ['More sell-out per outlet', 'Sell-out ↑', '#FF6A3D', 104],
+      ['Fewer stock-outs', 'Stock-outs ↓', '#F72585', 182],
+      ['Faster claims and billing', 'Claims faster', '#8B3DFF', 262],
+      ['Schemes that pay back', 'Schemes pay back', '#7209B7', 340]
+    ];
+    const curve = (x1, y1, x2, y2, k = 0.5) => `M${x1} ${y1} C${x1 + (x2 - x1) * k} ${y1} ${x2 - (x2 - x1) * k} ${y2} ${x2} ${y2}`;
 
-    const wires = el('g', {});
-    const paths = [];
-    D.forEach(d => paths.push(el('path', { class: 'wire w1', d: curve(HQ, d) }, wires)));
-    R.forEach((r, i) => paths.push(el('path', { class: 'wire w1', d: curve(D[Math.floor(i / 2)], r) }, wires)));
-    S.forEach((s, i) => el('path', { class: 'wire', d: curve(R[Math.floor(i / (S.length / R.length))] || R[R.length - 1], s) }, wires));
+    // Floor reflection + glow behind the prism
+    el('ellipse', { class: 'pz-floor', cx: C[0], cy: C[1] + H + 46, rx: 96, ry: 12, filter: 'url(#pzFloor)' });
+    el('rect', { class: 'pz-glow', x: L - 6, y: C[1] - H - 6, width: 2 * H + 12, height: 2 * H + 12, rx: 30, filter: 'url(#pzGlow)' });
 
-    const shelves = S.map(([x, y]) => { const n = el('g', { class: 'n-s' }); el('rect', { x: x - 9, y: y - 8, width: 18, height: 16, rx: 4 }, n); return n; });
-    R.forEach(([x, y]) => { const n = el('g', { class: 'n-r' }); el('circle', { cx: x, cy: y, r: 8 }, n); });
-    D.forEach(([x, y]) => { const n = el('g', { class: 'n-d' }); el('circle', { cx: x, cy: y, r: 12 }, n); });
-    const hq = el('g', { class: 'n-hq' });
-    el('rect', { x: HQ[0] - 44, y: HQ[1] - 22, width: 88, height: 44, rx: 12 }, hq);
-    const t = el('text', { x: HQ[0], y: HQ[1] + 5, 'text-anchor': 'middle' }, hq); t.textContent = 'HQ plan';
+    // Inputs: thin grey, slightly uneven beams that converge on the prism's left face
+    const gIn = el('g', { class: 'pz-ins' });
+    const inPaths = INS.map(([label, y], i) => {
+      const ey = C[1] - 26 + i * 13;
+      const d = curve(0, y, L, ey, 0.55);
+      el('path', { class: 'pz-in', d, pathLength: 1, style: `--d:${i * 0.07}s` }, gIn);
+      const t = el('text', { class: 'pz-lbl', x: 0, y: y - 8, style: `--d:${i * 0.07}s` }, gIn);
+      t.textContent = label;
+      return d;
+    });
 
-    if (reduce) { shelves.forEach(s => s.classList.add('lit')); return; }
-    // Pulses travel HQ → distributor → rep, then light a shelf
-    const pulse = (i) => {
-      const di = i % 3, ri = di * 2 + (Math.random() > .5 ? 1 : 0);
-      const route = [curve(HQ, D[di]), curve(D[di], R[ri])].join(' ').replace(/ M/g, ' L');
-      const dot = el('circle', { class: 'pulse', r: 4 });
-      const anim = el('animateMotion', { dur: '1.8s', path: route, fill: 'freeze', calcMode: 'spline', keyTimes: '0;1', keySplines: '.4 0 .2 1' }, dot);
+    // Outputs: wide coloured beams that fan out to outcome pills
+    const PX = 382;
+    const gOut = el('g', { class: 'pz-outs' });
+    const outPaths = OUTS.map(([, , c, py], i) => {
+      const sy = C[1] - 24 + i * 16;
+      const d = curve(R, sy, PX, py + 17, 0.5);
+      const lg = el('linearGradient', { id: `pzOut${i}`, x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
+      el('stop', { offset: '0', 'stop-color': c, 'stop-opacity': 1 }, lg);
+      el('stop', { offset: '1', 'stop-color': c, 'stop-opacity': 0.35 }, lg);
+      const g = el('g', { class: 'pz-out', 'data-i': i, style: `--d:${0.7 + i * 0.08}s` }, gOut);
+      el('path', { class: 'pz-beam-glow', d, stroke: c, filter: 'url(#pzSoft)', pathLength: 1 }, g);
+      el('path', { class: 'pz-beam', d, stroke: `url(#pzOut${i})`, pathLength: 1 }, g);
+      el('path', { class: 'pz-core', d, pathLength: 1 }, g);
+      return d;
+    });
+
+    // The prism itself
+    const prism = el('g', { class: 'pz-prism' });
+    el('rect', { x: L, y: C[1] - H, width: 2 * H, height: 2 * H, rx: 24, fill: 'url(#pzBody)', class: 'pz-body' }, prism);
+    el('rect', { x: L + 7, y: C[1] - H + 7, width: 2 * H - 14, height: 2 * H - 14, rx: 18, class: 'pz-inner' }, prism);
+    el('path', { d: `M${L + 16} ${C[1] - H + 10} H${R - 30}`, class: 'pz-shine' }, prism);
+    const mark = el('text', { x: C[0], y: C[1] + 12, 'text-anchor': 'middle', class: 'pz-mark' }, prism); mark.textContent = '✦';
+    const cap = el('text', { x: C[0], y: C[1] + H + 26, 'text-anchor': 'middle', class: 'pz-cap' }, prism); cap.textContent = 'BOTREE PRISM';
+
+    // Outcome pills
+    const pills = OUTS.map(([long, short, c, py], i) => {
+      const g = el('g', { class: 'pz-pill', 'data-i': i, style: `--d:${0.95 + i * 0.08}s`, tabindex: -1 });
+      el('rect', { x: PX, y: py, width: 190, height: 34, rx: 17, class: 'pz-pill-bg' }, g);
+      el('circle', { cx: PX + 17, cy: py + 17, r: 5, fill: c }, g);
+      const tl = el('text', { x: PX + 30, y: py + 21.5, class: 'pz-pill-t t-long' }, g); tl.textContent = long;
+      const ts = el('text', { x: PX + 30, y: py + 21.5, class: 'pz-pill-t t-short' }, g); ts.textContent = short;
+      g.addEventListener('mouseenter', () => svg.dataset.hot = i);
+      g.addEventListener('mouseleave', () => delete svg.dataset.hot);
+      return g;
+    });
+
+    requestAnimationFrame(() => svg.classList.add('is-in'));
+    if (reduce) return;
+
+    // Idle loop: a grey pulse enters the prism, a coloured pulse leaves on one outcome beam
+    const pulse = (d, cls, dur, color) => {
+      const dot = el('circle', { class: cls, r: cls === 'pz-p-out' ? 4 : 3, ...(color ? { stroke: color } : {}) });
+      const anim = el('animateMotion', { dur: `${dur}s`, path: d, fill: 'freeze', calcMode: 'spline', keyTimes: '0;1', keySplines: '.45 0 .25 1' }, dot);
       anim.beginElement();
-      setTimeout(() => {
-        dot.remove();
-        const per = S.length / R.length;
-        const s = shelves[Math.min(S.length - 1, Math.floor(ri * per + Math.random() * per))];
-        s.classList.add('lit');
-        setTimeout(() => s.classList.remove('lit'), 2600);
-      }, 1800);
+      setTimeout(() => dot.remove(), dur * 1000 + 50);
     };
     let n = 0;
-    setInterval(() => document.visibilityState === 'visible' && pulse(n++), 650);
+    setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      const i = n++;
+      pulse(inPaths[i % inPaths.length], 'pz-p-in', 1.1);
+      const o = i % outPaths.length;
+      setTimeout(() => pulse(outPaths[o], 'pz-p-out', 1.2, OUTS[o][2]), 1050);
+    }, 700);
+  })();
+
+  /* ---------- Hero visual B: RTM data dots → Botree Prism hub → outcome cards ---------- */
+  (function heroB() {
+    const svg = $('#map');
+    if (!svg || svg.dataset.hero !== 'b') return;
+    const el = (tag, attrs, parent = svg) => {
+      const n = document.createElementNS(SVGNS, tag);
+      for (const k in attrs) n.setAttribute(k, attrs[k]);
+      parent.appendChild(n);
+      return n;
+    };
+    const defs = el('defs', {});
+    const f = el('filter', { id: 'hbShadow', x: '-30%', y: '-30%', width: '160%', height: '170%' }, defs);
+    el('feDropShadow', { dx: 0, dy: 8, stdDeviation: 9, 'flood-color': '#2A1240', 'flood-opacity': .14 }, f);
+    const fg = el('filter', { id: 'hbGlow', x: '-60%', y: '-60%', width: '220%', height: '220%' }, defs);
+    el('feGaussianBlur', { stdDeviation: 14 }, fg);
+
+    const HUB = [222, 236], HR = 42;
+    const ROLE = { d: '#FF6A3D', r: '#F72585', s: '#8B3DFF' };
+    // Input lines: start off the left edge, sweep into the hub; dots sit along them
+    const LINES = [
+      [-10, 96, ['d', 0.32], ['r', 0.62]], [-10, 150, ['s', 0.45]], [-10, 206, ['d', 0.28], ['s', 0.6]],
+      [-10, 262, ['r', 0.38]], [-10, 318, ['s', 0.3], ['d', 0.66]], [-10, 376, ['r', 0.5]]
+    ];
+    const curve = (x1, y1, x2, y2) => `M${x1} ${y1} C${x1 + (x2 - x1) * 0.55} ${y1} ${x2 - (x2 - x1) * 0.35} ${y2} ${x2} ${y2}`;
+    const gIn = el('g', { class: 'hb-ins' });
+    const inPaths = LINES.map(([x, y, ...dots], i) => {
+      const ey = HUB[1] - 18 + i * 7;
+      const d = curve(x, y, HUB[0] - HR + 4, ey);
+      const p = el('path', { class: 'hb-in', d, pathLength: 1, style: `--d:${i * 0.06}s` }, gIn);
+      dots.forEach(([role, t], k) => {
+        // Point on the cubic at t (computed directly so it works before layout)
+        const [x0, y0, cx1, cy1, cx2, cy2, x3, y3] = [x, y, x + (HUB[0] - HR + 4 - x) * 0.55, y, HUB[0] - HR + 4 - (HUB[0] - HR + 4 - x) * 0.35, ey, HUB[0] - HR + 4, ey];
+        const u = 1 - t, bx = u * u * u * x0 + 3 * u * u * t * cx1 + 3 * u * t * t * cx2 + t * t * t * x3, by = u * u * u * y0 + 3 * u * u * t * cy1 + 3 * u * t * t * cy2 + t * t * t * y3;
+        el('circle', { class: 'hb-dot', cx: bx.toFixed(1), cy: by.toFixed(1), r: 6, stroke: ROLE[role], style: `--d:${0.2 + i * 0.06 + k * 0.05}s` }, gIn);
+      });
+      return d;
+    });
+
+    // Output rail from the hub through the three cards
+    const CY = 236, CW = 84, CH = 104, CX = [306, 400, 494];
+    el('path', { class: 'hb-rail', d: `M${HUB[0] + HR} ${CY} H${CX[2] + CW}`, pathLength: 1 });
+
+    // Hub
+    el('circle', { class: 'hb-halo', cx: HUB[0], cy: HUB[1], r: HR + 10, filter: 'url(#hbGlow)' });
+    el('circle', { class: 'hb-ring', cx: HUB[0], cy: HUB[1], r: HR + 8 });
+    const hub = el('g', { class: 'hb-hub' });
+    el('circle', { cx: HUB[0], cy: HUB[1], r: HR, class: 'hb-hub-bg' }, hub);
+    const m = el('text', { x: HUB[0], y: HUB[1] + 11, 'text-anchor': 'middle', class: 'hb-mark' }, hub); m.textContent = '✦';
+    const cap = el('text', { x: HUB[0], y: HUB[1] + HR + 26, 'text-anchor': 'middle', class: 'hb-cap' }, hub); cap.textContent = 'BOTREE PRISM';
+
+    // Outcome cards: sell-out bars, fill-rate donut, growth line
+    const cards = CX.map((x, i) => {
+      const y = CY - CH / 2;
+      const g = el('g', { class: 'hb-card', style: `--d:${0.9 + i * 0.12}s` });
+      el('rect', { x, y, width: CW, height: CH, rx: 14, class: 'hb-card-bg', filter: 'url(#hbShadow)' }, g);
+      const label = ['SELL-OUT', 'FILL RATE', 'GROWTH'][i];
+      if (i === 0) {
+        [[0.86, '#FF6A3D'], [0.7, '#B794F6'], [0.95, '#FF6A3D'], [0.55, '#B794F6']].forEach(([w, c], k) =>
+          el('rect', { x: x + 12, y: y + 16 + k * 13, width: (CW - 24) * w, height: 6, rx: 3, fill: c, class: 'hb-bar', style: `--d:${1.1 + k * 0.08}s` }, g));
+      } else if (i === 1) {
+        const cx = x + CW / 2, cy = y + 40, r = 21, C = 2 * Math.PI * r;
+        el('circle', { cx, cy, r, class: 'hb-donut-bg' }, g);
+        el('circle', { cx, cy, r, class: 'hb-donut', 'stroke-dasharray': `${C * 0.72} ${C}`, transform: `rotate(-90 ${cx} ${cy})`, style: `--c:${C}` }, g);
+        const t = el('text', { x: cx, y: cy + 4, 'text-anchor': 'middle', class: 'hb-num' }, g); t.textContent = '32%';
+      } else {
+        const pts = [[0, 0.2], [0.2, 0.35], [0.4, 0.3], [0.6, 0.55], [0.8, 0.62], [1, 0.9]].map(([a, b]) => `${(x + 12 + a * (CW - 24)).toFixed(1)},${(y + 64 - b * 46).toFixed(1)}`).join(' ');
+        el('polyline', { points: pts, class: 'hb-line', pathLength: 1 }, g);
+        el('circle', { cx: x + CW - 12, cy: y + 64 - 0.9 * 46, r: 3.5, class: 'hb-line-dot' }, g);
+      }
+      el('line', { x1: x + 12, y1: y + CH - 26, x2: x + CW - 12, y2: y + CH - 26, class: 'hb-sep' }, g);
+      const lt = el('text', { x: x + 12, y: y + CH - 11, class: 'hb-lbl' }, g); lt.textContent = label;
+      return g;
+    });
+
+    requestAnimationFrame(() => svg.classList.add('is-in'));
+    if (reduce) return;
+
+    // Idle loop: data dots flow into the hub, then out along the rail to a card, which pings
+    const pulse = (d, cls, dur) => {
+      const dot = el('circle', { class: cls, r: 3.5 });
+      const a = el('animateMotion', { dur: `${dur}s`, path: d, fill: 'freeze', calcMode: 'spline', keyTimes: '0;1', keySplines: '.45 0 .25 1' }, dot);
+      a.beginElement();
+      setTimeout(() => dot.remove(), dur * 1000 + 50);
+    };
+    let n = 0;
+    setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      const i = n++;
+      pulse(inPaths[i % inPaths.length], 'hb-p-in', 1.1);
+      const c = i % cards.length, tx = CX[c] + CW / 2;
+      setTimeout(() => {
+        pulse(`M${HUB[0] + HR} ${CY} H${tx}`, 'hb-p-out', 0.6 + c * 0.15);
+        setTimeout(() => { cards[c].classList.remove('ping'); void cards[c].getBBox(); cards[c].classList.add('ping'); }, (0.6 + c * 0.15) * 1000);
+      }, 1000);
+    }, 800);
+  })();
+
+  /* ---------- Hero visual A: many threads of RTM data → one point → the next right decision ---------- */
+  (function heroA() {
+    const svg = $('#map');
+    if (!svg || svg.dataset.hero !== 'a') return;
+    const el = (tag, attrs, parent = svg) => {
+      const n = document.createElementNS(SVGNS, tag);
+      for (const k in attrs) n.setAttribute(k, attrs[k]);
+      parent.appendChild(n);
+      return n;
+    };
+    const defs = el('defs', {});
+    const lin = (id, x1, x2, stops) => { const g = el('linearGradient', { id, gradientUnits: 'userSpaceOnUse', x1, y1: 0, x2, y2: 0 }, defs); stops.forEach(([o, c, a = 1]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, g)); };
+    lin('haThread', 0, 300, [['0', '#CFC4DE', 0.7], ['.7', '#B794F6', 0.85], ['1', '#8B3DFF', 1]]);
+    lin('haBeam', 300, 410, [['0', '#FF7A45'], ['.5', '#F72585'], ['1', '#7209B7']]);
+    const fg = el('filter', { id: 'haGlow', x: '-100%', y: '-100%', width: '300%', height: '300%' }, defs);
+    el('feGaussianBlur', { stdDeviation: 10 }, fg);
+    const fs = el('filter', { id: 'haShadow', x: '-20%', y: '-40%', width: '140%', height: '200%' }, defs);
+    el('feDropShadow', { dx: 0, dy: 8, stdDeviation: 9, 'flood-color': '#2A1240', 'flood-opacity': .14 }, fs);
+
+    const P = [300, 236], END = 404, N = 14;
+    const LABELS = { 0: 'Distributor billing', 2: 'Stock', 4: 'Claims', 6: 'Field visits', 8: 'Orders', 10: 'Retailer reorders', 12: 'Schemes' };
+    const threads = [];
+    const gT = el('g', { class: 'ha-threads' });
+    for (let i = 0; i < N; i++) {
+      const y = 98 + i * (278 / (N - 1));
+      const bend = 104 + (i % 3) * 14;
+      const d = `M0 ${y.toFixed(1)} H${bend} C${bend + 110} ${y.toFixed(1)} ${P[0] - 70} ${P[1]} ${P[0]} ${P[1]}`;
+      el('path', { class: 'ha-thread', d, pathLength: 1, style: `--d:${(Math.abs(i - (N - 1) / 2) * 0.04).toFixed(2)}s` }, gT);
+      if (LABELS[i]) { const t = el('text', { class: 'ha-lbl', x: 0, y: (y - 7).toFixed(1), style: `--d:${(i * 0.03).toFixed(2)}s` }, gT); t.textContent = LABELS[i]; }
+      if (i % 2 === 1) el('circle', { class: 'ha-pt', cx: 40 + ((i * 37) % 70), cy: y.toFixed(1), r: 2.6, style: `--d:${(0.3 + i * 0.03).toFixed(2)}s` }, gT);
+      threads.push(d);
+    }
+
+    // Single line to the decision
+    el('path', { class: 'ha-beam-glow', d: `M${P[0]} ${P[1]} H${END}`, filter: 'url(#haGlow)' });
+    el('path', { class: 'ha-beam', d: `M${P[0]} ${P[1]} H${END}`, pathLength: 1 });
+
+    // Convergence point: Botree Prism
+    el('circle', { class: 'ha-halo', cx: P[0], cy: P[1], r: 18, filter: 'url(#haGlow)' });
+    const core = el('g', { class: 'ha-core' });
+    el('circle', { cx: P[0], cy: P[1], r: 9, class: 'ha-core-dot' }, core);
+    const cap = el('text', { x: (P[0] + END) / 2 + 6, y: P[1] + 24, 'text-anchor': 'middle', class: 'ha-cap' }, core); cap.textContent = 'BOTREE PRISM';
+
+    // The decision chip
+    const chip = el('g', { class: 'ha-chip' });
+    el('rect', { x: END, y: P[1] - 21, width: 172, height: 42, rx: 21, class: 'ha-chip-bg', filter: 'url(#haShadow)' }, chip);
+    el('circle', { cx: END + 21, cy: P[1], r: 10, class: 'ha-chip-ic' }, chip);
+    const tick = el('text', { x: END + 21, y: P[1] + 4.5, 'text-anchor': 'middle', class: 'ha-chip-tick' }, chip); tick.textContent = '✓';
+    const ct = el('text', { x: END + 39, y: P[1] + 4.5, class: 'ha-chip-t' }, chip); ct.textContent = 'Next right decision';
+
+    requestAnimationFrame(() => svg.classList.add('is-in'));
+    if (reduce) return;
+
+    // Idle loop: pulses run along random threads, through the point, to the decision
+    let n = 0;
+    setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      const d = threads[(n * 5) % N] + ` H${END}`;
+      n++;
+      const dot = el('circle', { class: 'ha-p', r: 3 });
+      const a = el('animateMotion', { dur: '1.6s', path: d, fill: 'freeze', calcMode: 'spline', keyTimes: '0;1', keySplines: '.5 0 .3 1' }, dot);
+      a.beginElement();
+      setTimeout(() => { dot.remove(); chip.classList.remove('ping'); void chip.getBBox(); chip.classList.add('ping'); }, 1600);
+    }, 520);
   })();
 
   /* ---------- Logo marquee: duplicate for a seamless loop ---------- */
@@ -224,86 +436,212 @@
     }));
   })();
 
-  /* ---------- 04 Prism in action: the day, stop by stop ---------- */
-  (function day() {
-    // DUMMY COPY: stops 3–8 are draft content carried over from V1 (stop 1 is client copy,
-    // stop 2 from the site PDF). Confirm or replace with the client before launch.
+  /* ---------- 04 Prism in action: a carton travels the road through four stops ---------- */
+  (function trip() {
+    const root = $('#trip');
+    if (!root) return;
+    const section = $('#action'), road = $('#road'), carton = $('#carton'), list = $('#tstops');
+
+    /* Isometric 3D drawing: every face gets a soft gradient (lit top, mid front, shaded side),
+       rounded joins, a light rim on the top edges and a blurred floor shadow */
+    const S = 12, COS = Math.cos(Math.PI / 6);
+    const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+    const shade = (h, amt) => '#' + hex(h).map(v => Math.round(amt > 0 ? v + (255 - v) * amt : v * (1 + amt)).toString(16).padStart(2, '0')).join('');
+    let sceneId = 0;
+    const scene = draw => {
+      const id = 's' + (++sceneId), pts = [], parts = [], defs = new Map();
+      const pt = (x, y, z) => { const p = [(x - y) * COS * S, (x + y) * 0.5 * S - z * S]; pts.push(p); return p; };
+      const P = ps => ps.map(p => pt(...p).map(n => n.toFixed(1)).join(',')).join(' ');
+      // Gradient per colour + face, shared within this svg
+      const grad = (c, face) => {
+        const key = c + face;
+        if (!defs.has(key)) {
+          const gid = `${id}g${defs.size}`;
+          const [a, b, dir] = face === 'top' ? [shade(c, 0.46), shade(c, 0.2), 'x2="1" y2="1"']
+            : face === 'front' ? [shade(c, 0.1), shade(c, -0.14), 'x2="0" y2="1"']
+            : [shade(c, -0.12), shade(c, -0.36), 'x2="0" y2="1"'];
+          defs.set(key, `<linearGradient id="${gid}" x1="0" y1="0" ${dir}><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`);
+        }
+        return `url(#${id}g${[...defs.keys()].indexOf(key)})`;
+      };
+      const isHex = c => /^#[0-9a-f]{6}$/i.test(c);
+      const api = {
+        poly: (ps, fill) => parts.push(`<polygon points="${P(ps)}" fill="${fill}" stroke="${fill}" stroke-width="1.2" stroke-linejoin="round"/>`),
+        face: (ps, c, face) => api.poly(ps, isHex(c) ? grad(c, face) : c),
+        box: (x, y, z, w, d, h, c) => {
+          api.face([[x + w, y, z], [x + w, y + d, z], [x + w, y + d, z + h], [x + w, y, z + h]], c, 'side');
+          api.face([[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], c, 'front');
+          api.face([[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]], c, 'top');
+          // Rim light along the two top edges that face the viewer
+          parts.push(`<polyline points="${P([[x, y + d, z + h], [x + w, y + d, z + h], [x + w, y, z + h]])}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width=".9" stroke-linejoin="round" stroke-linecap="round"/>`);
+        },
+        front: (x, yf, z, w, h, fill) => api.poly([[x, yf, z], [x + w, yf, z], [x + w, yf, z + h], [x, yf, z + h]], fill),
+        side: (xf, y, z, d, h, fill) => api.poly([[xf, y, z], [xf, y + d, z], [xf, y + d, z + h], [xf, y, z + h]], fill),
+        circle: (x, y, z, r, fill) => {
+          const [cx, cy] = pt(x, y, z);
+          pts.push([cx - r, cy - r], [cx + r, cy + r]);
+          const gid = `${id}r${parts.length}`;
+          defs.set(gid, `<radialGradient id="${gid}" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="${shade(fill, 0.5)}"/><stop offset=".55" stop-color="${fill}"/><stop offset="1" stop-color="${shade(fill, -0.25)}"/></radialGradient>`);
+          parts.push(`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}" fill="url(#${gid})"/>`);
+        },
+        shadow: (w, d) => parts.push(`<polygon points="${P([[0.4, 0.8, -1.1], [w + 0.4, 0.8, -1.1], [w + 0.4, d + 0.8, -1.1], [0.4, d + 0.8, -1.1]])}" fill="rgba(42,18,64,.28)" filter="url(#${id}blur)"/>`)
+      };
+      draw(api);
+      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), pad = 6;
+      const x0 = Math.min(...xs) - pad, y0 = Math.min(...ys) - pad, w = Math.max(...xs) - x0 + pad, h = Math.max(...ys) - y0 + pad;
+      const defsOut = [...defs.entries()].map(([k, v]) => v).join('') + `<filter id="${id}blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter>`;
+      return `<svg viewBox="${x0.toFixed(1)} ${y0.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}" aria-hidden="true"><defs>${defsOut}</defs>${parts.join('')}</svg>`;
+    };
+    const ground = (g, c) => { g.shadow(9.5, 9.5); g.box(0, 0, -0.5, 9.5, 9.5, 0.5, shade(c, 0.8)); };
+    const CARTON = '#E9A15E';
+    const SCENES = {
+      dist: g => {
+        const c = '#FF6A3D';
+        ground(g, c);
+        g.box(1, 1, 0, 5.6, 4.6, 3, '#FF7A45');
+        g.box(0.8, 0.8, 3, 6, 5, 0.5, '#B9401F');
+        g.front(2.4, 5.6, 0, 2.2, 2.1, '#6E2210');
+        for (let i = 0; i < 4; i++) g.front(2.4, 5.6, 0.4 + i * 0.45, 2.2, 0.08, 'rgba(255,255,255,.18)');
+        g.side(6.6, 2, 1.2, 2.4, 1.1, 'rgba(255,255,255,.35)');
+        g.box(7, 4.6, 0, 1.4, 1.4, 1.2, CARTON); g.box(7, 4.6, 1.2, 1.4, 1.4, 1.2, CARTON); g.box(7, 6.4, 0, 1.4, 1.4, 1.2, CARTON);
+      },
+      rep: g => {
+        const c = '#F72585';
+        ground(g, c);
+        g.box(0.8, 0.8, 0, 1.8, 1.8, 1.6, '#F7A8CB'); g.box(3.2, 0.6, 0, 1.8, 1.8, 2.2, '#F48DBC'); g.box(0.6, 3.4, 0, 1.8, 1.8, 1.3, '#F9BFD9');
+        g.box(4.7, 5, 0, 1.3, 0.9, 1.9, '#2A1240');
+        g.box(4.5, 4.8, 1.9, 1.7, 1.3, 2.2, c);
+        g.box(6.2, 5.1, 2.3, 0.5, 0.8, 1.1, '#7209B7');
+        g.circle(5.35, 5.45, 4.95, 10, '#FFD6C4');
+        g.box(7.2, 6.6, 0, 1.2, 1.2, 1, CARTON);
+      },
+      shop: g => {
+        const c = '#9B5CF6';
+        ground(g, c);
+        g.box(1.4, 1.4, 0, 5.6, 4.6, 3.2, '#B794F6');
+        g.front(2.1, 6, 0, 1.5, 2.2, '#4B1F8C');
+        g.front(4.2, 6, 1, 2.2, 1.3, '#F3EDFF');
+        for (let i = 0; i < 5; i++) g.box(1.4 + i * 1.12, 6, 2.5, 1.12, 1, 0.34, i % 2 ? '#FFFFFF' : '#8B3DFF');
+        g.box(2.4, 5.8, 3.2, 3.6, 0.2, 0.8, '#2A1240');
+        g.box(7.3, 6.8, 0, 1.2, 1.2, 1, CARTON);
+      },
+      hq: g => {
+        const c = '#7209B7';
+        ground(g, c);
+        g.box(0.8, 4.6, 0, 3, 3.2, 2, '#A46BD8');
+        g.box(4.2, 1.8, 0, 3.2, 3.2, 7.2, c);
+        for (let z = 0.9; z < 6.8; z += 1.15) {
+          for (let x = 4.55, k = 0; x < 7.1; x += 0.95, k++) g.front(x, 5, z, 0.5, 0.6, (k + Math.round(z)) % 3 === 0 ? '#FFE3A3' : 'rgba(255,255,255,.55)');
+          for (let y = 2.15; y < 4.7; y += 0.95) g.side(7.4, y, z, 0.5, 0.6, 'rgba(255,255,255,.28)');
+        }
+        g.box(5.7, 3.3, 7.2, 0.25, 0.25, 1.5, '#2A1240');
+        g.circle(5.82, 3.42, 8.9, 4, '#F72585');
+      }
+    };
+    const cartonSvg = scene(g => {
+      g.box(0, 0, 0, 2, 2, 1.7, CARTON);
+      g.poly([[0.9, 0, 1.7], [1.1, 0, 1.7], [1.1, 2, 1.7], [0.9, 2, 1.7]], '#C77B3A');
+      g.front(0.9, 2, 1.1, 0.2, 0.6, '#C77B3A');
+    });
+
+    // DRAFT COPY: merged from the earlier 8-stop day. Confirm with the client before launch.
     const STOPS = [
-      { time: '6:00 am', sky: 'dawn', who: 'Brand and sales leadership', name: 'Factory and HQ', prod: 'ERP connectors',
-        h: 'The plan is made. Now it has to reach 5 million shelves.',
-        p: 'National targets, price lists and schemes are set at headquarters and pushed to the market through your ERP.',
-        wrong: 'The plan is national, but growth is won outlet by outlet. Targets and schemes lose their shape on the way down.',
-        prism: 'Target Disaggregation breaks national targets down to every rep and outlet, and Scheme Simulation tests a scheme before spend is committed.',
-        out: 'Targets reach every rep and outlet the way the plan intended' },
-      { time: '8:30 am', sky: 'dawn', who: 'The distributor', name: 'Primary dispatch', prod: 'Botree DMS',
+      { time: '8:30 am', who: 'The distributor', art: 'dist', c: 'var(--orange)', prod: 'Botree DMS',
         h: 'The distributor decides how much of your brand to carry.',
-        p: 'The distributor places a primary order and stock is dispatched from your depot.',
-        wrong: 'He orders on instinct and last month’s numbers, and holds back while claims are pending. Fast lines run short midweek.',
-        prism: 'Auto Replenishment suggests the next order before fast lines run out.',
-        stat: '32%', statLabel: 'improvement in fill rates' },
-      { time: '11:00 am', sky: 'day', who: 'The distributor', name: 'Distributor warehouse', prod: 'Botree DMS',
-        h: 'Every case is billed, stored and claimed.',
-        p: 'The distributor receives stock, bills retailers and files claims for the schemes he ran.',
-        wrong: 'Billing is keyed in by hand, claims sit in paperwork for weeks, and slow stock ages unseen.',
-        prism: 'Fraudulent distributor analysis flags claims that don’t match real sales.',
-        stat: '85%', statLabel: 'faster order-to-billing' },
-      { time: '1:30 pm', sky: 'day', who: 'The salesperson', name: 'On the beat', prod: 'Botree SFA',
+        p: 'Cartons leave your depot. The distributor places the order, bills retailers and files claims for the schemes he ran.',
+        wrong: 'He orders on instinct and last month’s numbers, holds back while claims are pending, and keys bills in by hand.',
+        prism: 'Auto Replenishment suggests the next order before fast lines run out, and Fraudulent distributor analysis flags claims that don’t match real sales.',
+        stats: [['32%', 'improvement in fill rates'], ['85%', 'faster order-to-billing']] },
+      { time: '1:30 pm', who: 'The salesperson', art: 'rep', c: 'var(--pink)', prod: 'Botree SFA',
         h: 'The salesperson decides where your growth goes.',
-        p: 'The rep visits outlets on the beat, takes orders and checks what’s on the shelf.',
-        wrong: 'The same route every week. Slipping outlets get missed, and orders depend on memory.',
-        prism: 'Route Optimization reshapes the beat, and Product Recommender suggests the order.',
-        stat: '12%', statLabel: 'increase in product assortment' },
-      { time: '3:00 pm', sky: 'day', who: 'The retailer', name: 'At the store counter', prod: 'Botree Retailer App',
+        p: 'The rep works the beat, takes orders and checks the shelf against the plan.',
+        wrong: 'The same route every week. Slipping outlets get missed, and range gaps surface only at month end.',
+        prism: 'Route Optimization reshapes the beat, Product Recommender suggests the order, and AI Nudges flag range gaps in the store.',
+        stats: [['12%', 'increase in product assortment']] },
+      { time: '6:00 pm', who: 'The retailer', art: 'shop', c: 'var(--lilac)', prod: 'Botree Retailer App',
         h: 'The retailer decides who earns the shelf.',
-        p: 'The retailer chooses what to stock, how much, and which schemes are worth it.',
-        wrong: 'He orders what the rep remembers to mention, and rarely hears about the latest scheme.',
-        prism: 'AI Ordering prepares the order from buying patterns and live schemes.',
-        stat: 'One tap', statLabel: 'to confirm a suggested order' },
-      { time: '4:30 pm', sky: 'dusk', who: 'Rep and retailer', name: 'In-store execution', prod: 'Botree SFA',
-        h: 'Your brand shows up the way it was planned.',
-        p: 'The rep checks shelf placement, displays and range against the plan.',
-        wrong: 'Displays go up late or not at all, and nobody at HQ knows until the month ends.',
-        prism: 'AI Nudges prompt the rep on range gaps and low stock while still in the store.',
-        stat: 'Same day', statLabel: 'range gaps closed' },
-      { time: '9:00 pm', sky: 'night', who: 'The retailer', name: 'Store, after hours', prod: 'Botree Retailer App',
-        h: 'The shelf reorders itself after closing.',
-        p: 'After closing, the retailer checks what sold and tops up for tomorrow.',
-        wrong: 'Reorders wait for the next rep visit, so fast lines sit empty for days.',
-        prism: 'Product Recommender suggests what to reorder before the shelf runs dry.',
-        stat: 'Before morning', statLabel: 'reorders reach the distributor' },
-      { time: '11:00 pm', sky: 'night', who: 'Your HQ', name: 'Back to HQ', prod: 'Botree Prism',
-        h: 'Every sale comes back as tomorrow’s decision.',
-        p: 'Orders, visits and sales from the day flow back to HQ overnight.',
+        p: 'The retailer chooses what to stock, and tops up after closing for tomorrow.',
+        wrong: 'He orders what the rep remembers to mention, rarely hears about schemes, and waits for the next visit to reorder.',
+        prism: 'AI Ordering prepares the order from buying patterns and live schemes, at any time of day.',
+        stats: [['One tap', 'to confirm a suggested order']] },
+      { time: '11:00 pm', who: 'Back to HQ', art: 'hq', c: 'var(--purple)', prod: 'Botree Prism',
+        h: 'Every sale comes back as tomorrow’s plan.',
+        p: 'Orders, visits and sales flow back to HQ overnight.',
         wrong: 'Secondary sales arrive weeks late in spreadsheets, so decisions run on old numbers.',
-        prism: 'Outletpulse and the Channel Performance Dashboard show what to fix tomorrow.',
-        stat: '100%', statLabel: 'visibility into secondary sales' }
+        prism: 'Outletpulse and the Channel Performance Dashboard show what to fix, and Target Disaggregation sets tomorrow’s targets.',
+        stats: [['100%', 'visibility into secondary sales']] }
     ];
-    const list = $('#stops'), side = $('#day-list');
-    if (!list) return;
+    const N = STOPS.length;
     const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     list.innerHTML = STOPS.map((s, i) => `
-      <li class="stop" id="stop-${i + 1}" data-i="${i}">
-        <div class="stop-step"><span class="t">${s.time}</span><span>Stop ${i + 1} of 8 · ${esc(s.who)}</span><span class="prod">${esc(s.prod)}</span></div>
-        <h3>${esc(s.h)}</h3>
-        <p>${esc(s.p)}</p>
-        <p class="stop-wrong"><b>What usually goes wrong:</b> ${esc(s.wrong)}</p>
-        <p class="stop-prism"><span class="spark" aria-hidden="true">✦</span><span><strong>Prism here:</strong> ${esc(s.prism)}</span></p>
-        <p class="stop-out"><span class="lab">Outcome</span>${s.stat ? `<b>${esc(s.stat)}</b><span>${esc(s.statLabel)}</span>` : `<span style="color:var(--text);font-weight:600">${esc(s.out)}</span>`}</p>
+      <li class="tstop" style="--c:${s.c}">
+        <div class="tnode"><div class="tart">${scene(SCENES[s.art])}</div><span class="ttime">${s.time}</span></div>
+        <article class="tcard">
+          <p class="t-meta"><span class="t-who">${esc(s.who)}</span><span>Stop ${i + 1} of ${N}</span><span class="t-prod">${esc(s.prod)}</span></p>
+          <h3>${esc(s.h)}</h3>
+          <p class="t-p">${esc(s.p)}</p>
+          <div class="t-cmp">
+            <div><span class="lab">Usually</span><p>${esc(s.wrong)}</p></div>
+            <div class="with"><span class="lab">✦ With Prism</span><p>${esc(s.prism)}</p></div>
+          </div>
+          <div class="t-out">${s.stats.map(([v, l]) => `<p><b>${esc(v)}</b><span>${esc(l)}</span></p>`).join('')}</div>
+        </article>
       </li>`).join('');
-    side.innerHTML = STOPS.map((s, i) => `<li><a href="#stop-${i + 1}" tabindex="-1">${esc(s.name)}</a></li>`).join('');
-    const stops = $$('.stop', list), dots = $$('li', side);
-    const clock = $('.clock'), tEl = $('#day-time'), stepEl = $('#day-step');
-    const set = i => {
-      stops.forEach((s, j) => s.classList.toggle('is-on', j === i));
-      dots.forEach((d, j) => { d.classList.toggle('done', j < i); d.classList.toggle('now', j === i); });
-      side.style.setProperty('--p', (i / (STOPS.length - 1)).toFixed(3));
-      tEl.textContent = STOPS[i].time;
-      stepEl.textContent = `Stop ${i + 1} of 8 · ${STOPS[i].name}`;
-      clock.dataset.sky = STOPS[i].sky;
+    carton.innerHTML = cartonSvg;
+    const stops = $$('.tstop', list), arts = $$('.tart', list);
+
+    /* Road through the scene centres; the carton rides it as you scroll */
+    let samples = [], total = 0, firstY = 0, lastY = 0, nodeYs = [], prog = null;
+    const build = () => {
+      const box = root.getBoundingClientRect();
+      const W = Math.round(box.width), H = Math.round(box.height);
+      const P = arts.map(a => { const r = a.getBoundingClientRect(); return [r.left - box.left + r.width / 2, r.top - box.top + r.height * 0.88]; });
+      nodeYs = P.map(p => p[1]);
+      const lead = Math.min(140, P[0][1]);
+      let d = `M${P[0][0].toFixed(1)} ${(P[0][1] - lead).toFixed(1)} L${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`;
+      for (let i = 1; i < P.length; i++) {
+        const [x1, y1] = P[i - 1], [x2, y2] = P[i], k = (y2 - y1) * 0.55;
+        d += ` C${x1.toFixed(1)} ${(y1 + k).toFixed(1)} ${x2.toFixed(1)} ${(y2 - k).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+      }
+      road.setAttribute('width', W); road.setAttribute('height', H); road.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      road.innerHTML = `<defs><linearGradient id="roadGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF7A45"/><stop offset=".5" stop-color="#F72585"/><stop offset="1" stop-color="#8B3DFF"/></linearGradient></defs>
+        <path class="r-edge" d="${d}"/><path class="r-base" d="${d}"/><path class="r-dash" d="${d}"/><path class="r-prog" d="${d}"/>`;
+      prog = $('.r-prog', road);
+      total = prog.getTotalLength();
+      prog.style.strokeDasharray = total;
+      samples = [];
+      for (let l = 0; l <= total; l += 4) { const p = prog.getPointAtLength(l); samples.push([l, p.x, p.y]); }
+      firstY = P[0][1]; lastY = P[P.length - 1][1];
+      update();
     };
-    midObserver(stops, s => set(+s.dataset.i), '-40% 0px -50% 0px');
-    set(0);
-    if (reduce) stops.forEach(s => s.classList.add('is-on'));
+    const SKY = ['#FFF1E8', '#FDF2F6', '#F3DDF0', '#22093A'];
+    const mix = (a, b, t) => '#' + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * t).toString(16).padStart(2, '0')).join('');
+    let cur = -1, ticking = false;
+    const update = () => {
+      ticking = false;
+      if (!samples.length) return;
+      const r = root.getBoundingClientRect();
+      const y = reduce ? lastY : Math.min(lastY, Math.max(firstY, innerHeight * 0.5 - r.top));
+      let lo = 0, hi = samples.length - 1;
+      while (lo < hi) { const m = (lo + hi) >> 1; if (samples[m][2] < y) lo = m + 1; else hi = m; }
+      const [len, x, py] = samples[lo];
+      carton.style.transform = `translate(${x.toFixed(1)}px, ${py.toFixed(1)}px) translate(-50%, -78%)`;
+      prog.style.strokeDashoffset = (total - len).toFixed(1);
+      let a = 0;
+      nodeYs.forEach((ny, i) => { if (y >= ny - 120) a = i; });
+      if (a !== cur) { cur = a; stops.forEach((s, i) => { s.classList.toggle('is-on', reduce || i === a); s.classList.toggle('done', i < a); }); }
+      if (!reduce) {
+        const t = (y - firstY) / Math.max(1, lastY - firstY) * (SKY.length - 1), i = Math.min(SKY.length - 2, Math.floor(t));
+        section.style.setProperty('--sky', mix(SKY[i], SKY[i + 1], t - i));
+        section.classList.toggle('is-night', t > 2.55);
+      }
+    };
+    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    let rt; const rebuild = () => { clearTimeout(rt); rt = setTimeout(build, 120); };
+    addEventListener('resize', rebuild);
+    if (window.ResizeObserver) new ResizeObserver(rebuild).observe(root);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+    build();
   })();
 
   /* ---------- 05 Proof: testimonials ---------- */

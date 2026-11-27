@@ -46,14 +46,8 @@
         <a class="btn btn-ghost" href="#problem">Read the story <span class="arr" aria-hidden="true">↓</span></a>
       </div>
     </div>
-    <figure class="hero-map" aria-label="One plan from HQ fanning out to distributors, sales reps and millions of shelves">
-      <svg id="map" viewBox="0 0 560 480" role="presentation"></svg>
-      <figcaption class="map-legend" aria-hidden="true">
-        <span><i class="l-hq"></i>HQ plan</span>
-        <span><i class="l-d"></i>Distributors</span>
-        <span><i class="l-r"></i>Sales reps</span>
-        <span><i class="l-s"></i>5M+ shelves</span>
-      </figcaption>
+    <figure class="hero-map" aria-label="Raw route-to-market data passing through Botree Prism and coming out as outcomes">
+      <svg id="map" viewBox="0 84 576 304" role="presentation"></svg>
     </figure>
   </div>
 
@@ -306,16 +300,15 @@
     <header class="ch-side"><span class="ch-name">Prism in action</span></header>
     <div class="ch-main">
       <h2 class="h2" id="action-title">Follow one carton from your factory to the shelf, <span class="tone2">and back again.</span></h2>
-      <p class="lead">One illustrative day, eight stops. At each one: who decides, what usually goes wrong, and where Prism steps in.</p>
+      <p class="lead">One illustrative day, four stops. At each one: who decides, what usually goes wrong, and where Prism steps in.</p>
     </div>
   </div>
 
-  <div class="wrap day">
-    <aside class="day-side" aria-hidden="true">
-      <div class="clock"><span class="sky" id="day-sky"></span><b id="day-time">6:00 am</b><small id="day-step">Stop 1 of 8</small></div>
-      <ol class="day-list" id="day-list"></ol>
-    </aside>
-    <ol class="stops" id="stops"></ol>
+  <!-- The carton travels a road through four stops; road, carton and scenes are drawn by script.js -->
+  <div class="wrap trip" id="trip">
+    <svg class="road" id="road" aria-hidden="true"></svg>
+    <div class="carton" id="carton" aria-hidden="true"></div>
+    <ol class="tstops" id="tstops"></ol>
   </div>
 </section>
 
